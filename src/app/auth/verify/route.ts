@@ -1,3 +1,4 @@
+import { upsertSession, upsertUser } from "@/api/database";
 import { getMe, getToken } from "@/api/discord";
 import { NextResponse } from "next/server";
 
@@ -18,8 +19,19 @@ export async function GET(request: Request) {
     const tokenData = await getToken(code);
     const discordUserData = await getMe(tokenData.access_token);
 
-    // TODO: create session and user
-    console.log(discordUserData);
+    const { id } = await upsertUser({
+      discordId: discordUserData.id,
+      discordUsername: discordUserData.username,
+    });
+
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + tokenData.expires_in);
+
+    await upsertSession({
+      userId: id,
+      token: tokenData.access_token,
+      expiresAt,
+    });
 
     const response = NextResponse.redirect(
       new URL("/auth/success", request.url)
