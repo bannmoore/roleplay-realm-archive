@@ -9,8 +9,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        black: "var(--black)",
+        white: "var(--white)",
+        spacecadet: "var(--spacecadet)",
+        ultraviolet: "var(--ultraviolet)",
+        columbiawhite: "var(--columbiawhite)",
       },
     },
   },
