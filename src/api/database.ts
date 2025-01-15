@@ -10,12 +10,13 @@ const db = new Kysely<DB>({
   }),
 });
 
-export function getUserByDiscordId(discordId: string) {
+export function getMe(token: string) {
   return db
     .selectFrom("users")
-    .where("discord_id", "=", discordId)
+    .innerJoin("sessions", "sessions.user_id", "users.id")
+    .where("sessions.token", "=", token)
     .selectAll()
-    .executeTakeFirst();
+    .executeTakeFirstOrThrow();
 }
 
 export function upsertUser({

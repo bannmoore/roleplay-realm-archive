@@ -7,6 +7,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
     const state = searchParams.get("state");
+    const error = searchParams.get("error");
+
+    if (error) {
+      throw new Error(
+        searchParams.get("error_description") || "Unknown error from Discord"
+      );
+    }
 
     if (!code) {
       throw new Error("Missing code");
@@ -48,6 +55,13 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error(err);
-    return NextResponse.redirect(new URL("/auth/error", request.url));
+
+    // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+    let message = "Unknown Error";
+    if (err instanceof Error) message = err.message;
+
+    return NextResponse.redirect(
+      new URL(`/auth/error?description=${message}`, request.url)
+    );
   }
 }

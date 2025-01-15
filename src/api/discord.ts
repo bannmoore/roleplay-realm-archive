@@ -50,3 +50,28 @@ export async function getMe(accessToken: string): Promise<DiscordUserResponse> {
 
   return response.json();
 }
+
+export type DiscordGuildResponse = {
+  id: string;
+  name: string;
+  icon: string;
+};
+
+export async function getGuildAsBot(
+  id: string
+): Promise<DiscordGuildResponse | null> {
+  console.log(`https://discord.com/api/guilds/${id}`);
+  const response = await fetch(`https://discord.com/api/guilds/${id}`, {
+    method: "get",
+    headers: {
+      Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (response.status === 200) {
+    return response.json();
+  } else {
+    return null;
+  }
+}
