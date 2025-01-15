@@ -1,6 +1,6 @@
 "use client";
 
-import { getChannelById } from "@/actions";
+import { addServer, getServer, getChannelById } from "@/actions";
 import { DiscordGuildResponse } from "@/api/discord";
 import Image from "next/image";
 import { FormEvent, useState } from "react";
@@ -8,17 +8,28 @@ import { FormEvent, useState } from "react";
 export function GetGuildForm() {
   const [id, setId] = useState("");
   const [searched, setSearched] = useState(false);
+  const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [guild, setGuild] = useState<DiscordGuildResponse | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setAlreadyAdded(false);
 
     const searchedGuild = await getChannelById(id);
     if (searchedGuild) {
+      const server = await getServer(searchedGuild.id);
+      if (server) {
+        setAlreadyAdded(true);
+      }
       setGuild(searchedGuild);
     }
 
     setSearched(true);
+  }
+
+  async function handleAddServer(guild: DiscordGuildResponse) {
+    await addServer(guild);
+    setAlreadyAdded(true);
   }
 
   return (
@@ -56,7 +67,9 @@ export function GetGuildForm() {
             height={100}
           />
           <h2 className="mb-4">{guild.name}</h2>
-          <button type="button">Add</button>
+          <button type="button" onClick={() => handleAddServer(guild)}>
+            {alreadyAdded ? "Update" : "Add"}
+          </button>
         </div>
       )}
 

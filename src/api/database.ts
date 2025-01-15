@@ -62,3 +62,34 @@ export function upsertSession({
     )
     .executeTakeFirstOrThrow();
 }
+
+export function getServer(discordId: string) {
+  return db
+    .selectFrom("servers")
+    .selectAll()
+    .where("discord_id", "=", discordId)
+    .executeTakeFirst();
+}
+
+export function upsertServer({
+  discordId,
+  name,
+  iconHash,
+}: {
+  discordId: string;
+  name: string;
+  iconHash: string;
+}) {
+  return db
+    .insertInto("servers")
+    .columns(["discord_id", "name", "icon_hash"])
+    .values({
+      discord_id: discordId,
+      name,
+      icon_hash: iconHash,
+    })
+    .onConflict((oc) =>
+      oc.column("discord_id").doUpdateSet({ name: name, icon_hash: iconHash })
+    )
+    .executeTakeFirstOrThrow();
+}

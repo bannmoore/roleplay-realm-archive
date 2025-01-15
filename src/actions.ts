@@ -1,7 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { getGuildAsBot } from "./api/discord";
+import { DiscordGuildResponse, getGuildAsBot } from "./api/discord";
+import { upsertServer, getServer as selectServer } from "./api/database";
 
 export async function getChannelById(guildId: string) {
   const token = (await cookies()).get("token")?.value;
@@ -12,4 +13,16 @@ export async function getChannelById(guildId: string) {
   }
 
   return guild;
+}
+
+export async function getServer(discordId: string) {
+  return selectServer(discordId);
+}
+
+export async function addServer(guild: DiscordGuildResponse) {
+  upsertServer({
+    discordId: guild.id,
+    name: guild.name,
+    iconHash: guild.icon,
+  });
 }
