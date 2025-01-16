@@ -75,3 +75,15 @@ export async function getGuildAsBot(
     return null;
   }
 }
+
+export async function getGuildsAsBot(): Promise<DiscordGuildResponse[]> {
+  const response = await fetch("https://discord.com/api/users/@me/guilds", {
+    method: "get",
+    headers: {
+      Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      Accept: "application/json",
+    },
+  });
+
+  return response.json();
+}

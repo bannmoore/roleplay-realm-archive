@@ -1,5 +1,5 @@
-import { Kysely, PostgresDialect } from "kysely";
-import { DB } from "kysely-codegen";
+import { Kysely, PostgresDialect, Selectable } from "kysely";
+import { DB, Servers } from "kysely-codegen";
 import { Pool } from "pg";
 
 const db = new Kysely<DB>({
@@ -71,6 +71,19 @@ export function getServer(discordId: string) {
     .executeTakeFirst();
 }
 
+export function getServers(): Promise<Selectable<Servers>[]> {
+  return db.selectFrom("servers").selectAll().execute();
+}
+
+export function deactivateServers() {
+  return db
+    .updateTable("servers")
+    .set({
+      active: false,
+    })
+    .execute();
+}
+
 export function upsertServer({
   discordId,
   name,
@@ -82,14 +95,17 @@ export function upsertServer({
 }) {
   return db
     .insertInto("servers")
-    .columns(["discord_id", "name", "icon_hash"])
+    .columns(["discord_id", "name", "icon_hash", "active"])
     .values({
       discord_id: discordId,
       name,
       icon_hash: iconHash,
+      active: true,
     })
     .onConflict((oc) =>
-      oc.column("discord_id").doUpdateSet({ name: name, icon_hash: iconHash })
+      oc
+        .column("discord_id")
+        .doUpdateSet({ name: name, icon_hash: iconHash, active: true })
     )
     .executeTakeFirstOrThrow();
 }
