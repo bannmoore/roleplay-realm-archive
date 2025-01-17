@@ -1,5 +1,5 @@
 import { getServers } from "@/api/database";
-import { RefreshServersButton } from "@/components/RefreshServersButton";
+import { RefreshServersButton } from "@/app/home/RefreshServersButton";
 import { Selectable } from "kysely";
 import { Servers } from "kysely-codegen";
 import { cookies } from "next/headers";

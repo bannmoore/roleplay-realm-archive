@@ -1,6 +1,6 @@
 "use client";
 
-import { refreshServers } from "@/actions";
+import { refreshServers } from "./actions";
 
 export function RefreshServersButton() {
   return (

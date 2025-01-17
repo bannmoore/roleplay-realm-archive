@@ -63,14 +63,6 @@ export function upsertSession({
     .executeTakeFirstOrThrow();
 }
 
-export function getServer(discordId: string) {
-  return db
-    .selectFrom("servers")
-    .selectAll()
-    .where("discord_id", "=", discordId)
-    .executeTakeFirst();
-}
-
 export function getServers(): Promise<Selectable<Servers>[]> {
   return db.selectFrom("servers").selectAll().execute();
 }

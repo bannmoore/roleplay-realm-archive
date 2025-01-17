@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { getMe } from "@/api/discord";
+import { getMe } from "@/api/database";
 import { cookies } from "next/headers";
 
 const geistSans = Geist({
@@ -39,7 +39,7 @@ export default async function RootLayout({
       >
         <header className="container m-auto flex p-4">
           <Link href="/">THE ARCHIVE</Link>
-          <div className="flex-1 text-right">{user?.username}</div>
+          <div className="flex-1 text-right">{user?.discord_username}</div>
         </header>
         <main className="container m-auto p-4 text-center">{children}</main>
       </body>
