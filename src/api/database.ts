@@ -10,7 +10,7 @@ const db = new Kysely<DB>({
   }),
 });
 
-export function getMe(token: string) {
+export function getCurrentUser(token: string) {
   return db
     .selectFrom("users")
     .innerJoin("sessions", "sessions.user_id", "users.id")

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default async function AuthErrorPage({
   searchParams,
 }: {
@@ -11,9 +13,9 @@ export default async function AuthErrorPage({
     <main>
       <h1 className="mb-4">Well, that didn&apos;t work...</h1>
       <div className="mb-4">{description}</div>
-      <a className="button" href="http://localhost:3000/">
-        Click here to go back.
-      </a>
+      <Link className="button" href="/">
+        Return home
+      </Link>
     </main>
   );
 }

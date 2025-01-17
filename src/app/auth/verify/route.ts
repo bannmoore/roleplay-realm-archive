@@ -1,5 +1,5 @@
 import { upsertSession, upsertUser } from "@/api/database";
-import { getMe, getToken } from "@/api/discord";
+import { getDiscordUser, exhangeAuthCodeForToken } from "@/api/discord";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -23,12 +23,12 @@ export async function GET(request: Request) {
       throw new Error("Invalid state");
     }
 
-    const tokenData = await getToken(code);
-    const discordUserData = await getMe(tokenData.access_token);
+    const tokenData = await exhangeAuthCodeForToken(code);
+    const discordUser = await getDiscordUser(tokenData.access_token);
 
     const { id } = await upsertUser({
-      discordId: discordUserData.id,
-      discordUsername: discordUserData.username,
+      discordId: discordUser.id,
+      discordUsername: discordUser.username,
     });
 
     const expiresAt = new Date();

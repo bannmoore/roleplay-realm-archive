@@ -1,10 +1,12 @@
+import Link from "next/link";
+
 export default function AuthSuccess() {
   return (
     <main>
-      <h1 className="mb-4">Login Successful!</h1>
-      <a className="button" href="http://localhost:3000/">
-        Click here to continue.
-      </a>
+      <h1 className="mb-8">Login Successful!</h1>
+      <Link className="button" href="/">
+        Continue
+      </Link>
     </main>
   );
 }

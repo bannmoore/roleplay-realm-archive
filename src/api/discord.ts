@@ -6,14 +6,15 @@ type DiscordTokenResponse = {
   scope: string;
 };
 
-export async function getToken(code: string): Promise<DiscordTokenResponse> {
-  // TODO: v10
-  const response = await fetch("https://discord.com/api/oauth2/token", {
+export async function exhangeAuthCodeForToken(
+  code: string
+): Promise<DiscordTokenResponse> {
+  const response = await fetch(`${process.env.DISCORD_API_URL}/oauth2/token`, {
     method: "post",
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code: code ?? "",
-      redirect_uri: "http://localhost:3000/auth/verify",
+      redirect_uri: `${process.env.BASE_URL}/auth/verify`,
       client_id: process.env.DISCORD_CLIENT_ID || "",
       client_secret: process.env.DISCORD_CLIENT_SECRET || "",
     }),
@@ -31,7 +32,7 @@ export async function getToken(code: string): Promise<DiscordTokenResponse> {
   return tokenPayload;
 }
 
-type DiscordUserResponse = {
+type DiscordUser = {
   id: string;
   // TODO:: hash, https://discord.com/developers/docs/reference#image-formatting
   username: string;
@@ -39,8 +40,10 @@ type DiscordUserResponse = {
   global_name: string;
 };
 
-export async function getMe(accessToken: string): Promise<DiscordUserResponse> {
-  const response = await fetch("https://discord.com/api/users/@me", {
+export async function getDiscordUser(
+  accessToken: string
+): Promise<DiscordUser> {
+  const response = await fetch(`${process.env.DISCORD_API_URL}/users/@me`, {
     method: "get",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -51,17 +54,16 @@ export async function getMe(accessToken: string): Promise<DiscordUserResponse> {
   return response.json();
 }
 
-export type DiscordGuildResponse = {
+export type DiscordGuild = {
   id: string;
   name: string;
   icon: string;
 };
 
-export async function getGuildAsBot(
+export async function getDiscordGuild(
   id: string
-): Promise<DiscordGuildResponse | null> {
-  console.log(`https://discord.com/api/guilds/${id}`);
-  const response = await fetch(`https://discord.com/api/guilds/${id}`, {
+): Promise<DiscordGuild | null> {
+  const response = await fetch(`${process.env.DISCORD_API_URL}/guilds/${id}`, {
     method: "get",
     headers: {
       Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
@@ -76,14 +78,17 @@ export async function getGuildAsBot(
   }
 }
 
-export async function getGuildsAsBot(): Promise<DiscordGuildResponse[]> {
-  const response = await fetch("https://discord.com/api/users/@me/guilds", {
-    method: "get",
-    headers: {
-      Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-      Accept: "application/json",
-    },
-  });
+export async function getDiscordGuilds(): Promise<DiscordGuild[]> {
+  const response = await fetch(
+    `${process.env.DISCORD_API_URL}/users/@me/guilds`,
+    {
+      method: "get",
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        Accept: "application/json",
+      },
+    }
+  );
 
   return response.json();
 }
