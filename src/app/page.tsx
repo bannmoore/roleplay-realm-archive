@@ -16,20 +16,20 @@ export default async function HomePage() {
 
   return (
     <>
-      {servers.map((s) => (
+      {servers.map((server) => (
         <Link
-          key={s.id}
-          href={`/servers/${s.id}`}
+          key={server.id}
+          href={`/servers/${server.id}`}
           className="mb-4 flex items-center bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg hover:bg-darkpurple-800 transition-all ease-in"
         >
           <Image
             className="rounded-full mr-4"
-            src={`https://cdn.discordapp.com/icons/${s.discord_id}/${s.icon_hash}.png`}
-            alt={`${s.name} icon`}
+            src={`https://cdn.discordapp.com/icons/${server.discord_id}/${server.icon_hash}.png`}
+            alt={`${server.name} icon`}
             width={60}
             height={60}
           />
-          <div>{s.name}</div>
+          <div>{server.name}</div>
         </Link>
       ))}
 

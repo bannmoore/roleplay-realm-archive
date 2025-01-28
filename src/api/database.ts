@@ -63,6 +63,14 @@ export function upsertSession({
     .executeTakeFirstOrThrow();
 }
 
+export function getServer(id: string) {
+  return db
+    .selectFrom("servers")
+    .selectAll()
+    .where("id", "=", id)
+    .executeTakeFirst();
+}
+
 export function getServers(): Promise<Selectable<Servers>[]> {
   return db.selectFrom("servers").selectAll().execute();
 }

@@ -92,3 +92,27 @@ export async function getDiscordGuilds(): Promise<DiscordGuild[]> {
 
   return response.json();
 }
+
+export type DiscordGuildChannel = {
+  id: string;
+  guild_id: string;
+  name: string;
+  parent_id: string | null;
+};
+
+export async function getDiscordGuildChannels(
+  guildId: string
+): Promise<DiscordGuildChannel[]> {
+  const response = await fetch(
+    `${process.env.DISCORD_API_URL}/guilds/${guildId}/channels`,
+    {
+      method: "get",
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return response.json();
+}
