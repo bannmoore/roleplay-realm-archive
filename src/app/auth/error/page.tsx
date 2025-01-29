@@ -3,11 +3,9 @@ import Link from "next/link";
 export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: {
-    description: string | string[] | undefined;
-  };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const description = searchParams.description;
+  const description = (await searchParams).description;
 
   return (
     <main>
