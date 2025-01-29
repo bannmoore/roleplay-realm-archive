@@ -138,6 +138,14 @@ export function upsertServer({
     .executeTakeFirstOrThrow();
 }
 
+export function getChannel(channelId: string) {
+  return db
+    .selectFrom("channels")
+    .selectAll()
+    .where("id", "=", channelId)
+    .executeTakeFirst();
+}
+
 export function getChannels(serverId: string) {
   return db
     .selectFrom("channels")
@@ -169,8 +177,12 @@ export function upsertChannel(serverId: string, channel: DiscordChannel) {
 export function getMessages(channelId: string) {
   return db
     .selectFrom("messages")
-    .selectAll()
+    .innerJoin("users", "messages.author_id", "users.id")
+    .selectAll("messages")
+    .select(["users.discord_username"])
     .where("channel_id", "=", channelId)
+    .orderBy("discord_published_at asc")
+    .limit(10)
     .execute();
 }
 
