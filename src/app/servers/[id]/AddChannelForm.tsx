@@ -2,21 +2,35 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { getChannelOptions, syncChannel } from "./actions";
-import { DiscordGuildChannel } from "@/api/discord";
+import { DiscordChannel } from "@/api/discord";
 
-export function AddChannelForm({ serverId }: { serverId: string }) {
-  const [channels, setChannels] = useState<DiscordGuildChannel[]>([]);
+export function AddChannelForm({
+  serverDiscordId,
+  serverId,
+}: {
+  serverDiscordId: string;
+  serverId: string;
+}) {
+  const [channels, setChannels] = useState<DiscordChannel[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<string>("");
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    getChannelOptions(serverId).then(setChannels);
-  }, [serverId, setChannels]);
+    getChannelOptions(serverDiscordId).then(setChannels);
+  }, [serverDiscordId, setChannels]);
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    console.log(selectedChannelId);
-    if (selectedChannelId) {
-      syncChannel(selectedChannelId);
+    setIsSyncing(false);
+
+    const channel = channels.find(
+      (channel) => channel.id === selectedChannelId
+    );
+
+    if (selectedChannelId && channel) {
+      setIsSyncing(true);
+      await syncChannel(serverId, channel);
+      setIsSyncing(false);
     }
   }
 
@@ -39,7 +53,11 @@ export function AddChannelForm({ serverId }: { serverId: string }) {
         ))}
       </select>
 
-      <button type="submit">Add</button>
+      <button type="submit" disabled={isSyncing}>
+        Add
+      </button>
+
+      {isSyncing && <p>Doing the thing... please wait.</p>}
     </form>
   );
 }

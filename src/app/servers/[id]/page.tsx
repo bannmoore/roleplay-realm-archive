@@ -1,10 +1,8 @@
-import { getServer } from "@/api/database";
+import { getChannels, getServer } from "@/api/database";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Channels } from "kysely-codegen";
-import { Selectable } from "kysely";
-import { getDiscordGuildChannels } from "@/api/discord";
 import { AddChannelSection } from "./AddChannelSection";
+import Link from "next/link";
 
 export default async function Page({
   params,
@@ -18,7 +16,7 @@ export default async function Page({
     return notFound();
   }
 
-  const channels: Selectable<Channels>[] = [];
+  const channels = await getChannels(server.id);
 
   return (
     <>
@@ -33,11 +31,22 @@ export default async function Page({
         />
       </div>
 
-      <AddChannelSection serverId={server.discord_id} />
+      <AddChannelSection
+        serverDiscordId={server.discord_id}
+        serverId={server.id}
+      />
 
-      {channels.map((channel) => (
-        <>TBD wheee</>
-      ))}
+      <div className="mt-4">
+        {channels.map((channel) => (
+          <Link
+            key={channel.id}
+            href={`/channels/${channel.id}`}
+            className="mb-4 flex items-center bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg hover:bg-darkpurple-800 transition-all ease-in"
+          >
+            {channel.name}
+          </Link>
+        ))}
+      </div>
     </>
   );
 }

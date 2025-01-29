@@ -1,12 +1,53 @@
 "use server";
 
-import { getDiscordGuildChannels } from "@/api/discord";
+import { upsertChannel, upsertMessages, upsertUsers } from "@/api/database";
+import {
+  DiscordChannel,
+  DiscordMessage,
+  getDiscordChannels,
+  getDiscordMessages,
+} from "@/api/discord";
+import { Selectable } from "kysely";
+import { Users } from "kysely-codegen";
 
-export async function getChannelOptions(serverId: string) {
-  const all = await getDiscordGuildChannels(serverId);
+export async function getChannelOptions(serverDiscordId: string) {
+  const all = await getDiscordChannels(serverDiscordId);
   return all.filter((c) => c.parent_id);
 }
 
-export async function syncChannel(channelId: string) {
-  console.log("whee");
+export type MessageWithUser = DiscordMessage & {
+  author_user?: Selectable<Users>;
+};
+
+export async function syncChannel(serverId: string, channel: DiscordChannel) {
+  console.log("upsertChannel", serverId, channel);
+  const channelResult = await upsertChannel(serverId, channel);
+
+  if (!channelResult) {
+    throw new Error("Failed to insert channel.");
+  }
+
+  const messages = await getDiscordMessages(channel.id);
+  const authors = messages
+    .filter(
+      (message, index, self) =>
+        self.findIndex((m) => m.author.id === message.author.id) === index
+    )
+    .map((message) => message.author);
+
+  const usersResult = await upsertUsers(authors);
+
+  const messagesWithUsers: MessageWithUser[] = messages
+    .map((message) => ({
+      ...message,
+      content: message.content?.replace(/<@[0-9]+>/, "").trim(),
+      author_user: usersResult.find(
+        (row) => row.discord_id === message.author.id
+      ),
+    }))
+    .filter((message) => message.author_user && message.content);
+
+  await upsertMessages(channelResult.id, messagesWithUsers);
+
+  return;
 }

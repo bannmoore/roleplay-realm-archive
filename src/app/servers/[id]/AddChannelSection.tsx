@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { AddChannelForm } from "./AddChannelForm";
 
-export function AddChannelSection({ serverId }: { serverId: string }) {
+export function AddChannelSection({
+  serverDiscordId,
+  serverId,
+}: {
+  serverDiscordId: string;
+  serverId: string;
+}) {
   const [isVisible, setIsVisible] = useState(false);
 
   function toggleSection() {
@@ -16,7 +22,9 @@ export function AddChannelSection({ serverId }: { serverId: string }) {
         Add Channel
       </button>
 
-      {isVisible && <AddChannelForm serverId={serverId} />}
+      {isVisible && (
+        <AddChannelForm serverDiscordId={serverDiscordId} serverId={serverId} />
+      )}
     </>
   );
 }

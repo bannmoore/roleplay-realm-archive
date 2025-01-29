@@ -32,11 +32,11 @@ export async function exhangeAuthCodeForToken(
   return tokenPayload;
 }
 
-type DiscordUser = {
+export type DiscordUser = {
   id: string;
   // TODO:: hash, https://discord.com/developers/docs/reference#image-formatting
   username: string;
-  avatar: string;
+  avatar?: string;
   global_name: string;
 };
 
@@ -93,18 +93,43 @@ export async function getDiscordGuilds(): Promise<DiscordGuild[]> {
   return response.json();
 }
 
-export type DiscordGuildChannel = {
+export type DiscordChannel = {
   id: string;
   guild_id: string;
   name: string;
   parent_id: string | null;
 };
 
-export async function getDiscordGuildChannels(
+export async function getDiscordChannels(
   guildId: string
-): Promise<DiscordGuildChannel[]> {
+): Promise<DiscordChannel[]> {
   const response = await fetch(
     `${process.env.DISCORD_API_URL}/guilds/${guildId}/channels`,
+    {
+      method: "get",
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return response.json();
+}
+
+export type DiscordMessage = {
+  id: string;
+  channel_id: string;
+  author: DiscordUser;
+  content?: string;
+  timestamp: string;
+};
+
+export async function getDiscordMessages(
+  channelId: string
+): Promise<DiscordMessage[]> {
+  const response = await fetch(
+    `${process.env.DISCORD_API_URL}/channels/${channelId}/messages?limit=10`,
     {
       method: "get",
       headers: {

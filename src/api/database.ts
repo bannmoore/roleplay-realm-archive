@@ -1,6 +1,8 @@
 import { Kysely, PostgresDialect, Selectable } from "kysely";
 import { DB, Servers } from "kysely-codegen";
 import { Pool } from "pg";
+import { DiscordChannel, DiscordUser } from "./discord";
+import { MessageWithUser } from "@/app/servers/[id]/actions";
 
 const db = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -38,6 +40,32 @@ export function upsertUser({
       oc.column("discord_id").doUpdateSet({ discord_username: discordUsername })
     )
     .executeTakeFirstOrThrow();
+}
+
+export function upsertUsers(users: DiscordUser[]) {
+  const ids = users.map((user) => user.id);
+
+  return db
+    .with("inserted", (db) =>
+      db
+        .insertInto("users")
+        .values(
+          users.map((user) => ({
+            discord_id: user.id,
+            discord_username: user.username,
+          }))
+        )
+        .onConflict((oc) =>
+          oc.column("discord_id").doUpdateSet({
+            discord_username: (eb) => eb.ref("excluded.discord_username"),
+          })
+        )
+        .returningAll()
+    )
+    .selectFrom("inserted")
+    .selectAll()
+    .union(db.selectFrom("users").selectAll().where("id", "in", ids))
+    .execute();
 }
 
 export function upsertSession({
@@ -108,4 +136,60 @@ export function upsertServer({
         .doUpdateSet({ name: name, icon_hash: iconHash, active: true })
     )
     .executeTakeFirstOrThrow();
+}
+
+export function getChannels(serverId: string) {
+  return db
+    .selectFrom("channels")
+    .selectAll()
+    .where("server_id", "=", serverId)
+    .execute();
+}
+
+export function upsertChannel(serverId: string, channel: DiscordChannel) {
+  return db
+    .with("inserted", (db) =>
+      db
+        .insertInto("channels")
+        .values({
+          discord_id: channel.id,
+          server_id: serverId,
+          name: channel.name,
+          active: true,
+        })
+        .onConflict((oc) => oc.column("discord_id").doNothing())
+        .returningAll()
+    )
+    .selectFrom("inserted")
+    .selectAll()
+    .union(db.selectFrom("channels").selectAll())
+    .executeTakeFirst();
+}
+
+export function getMessages(channelId: string) {
+  return db
+    .selectFrom("messages")
+    .selectAll()
+    .where("channel_id", "=", channelId)
+    .execute();
+}
+
+export function upsertMessages(channelId: string, messages: MessageWithUser[]) {
+  return db
+    .insertInto("messages")
+    .values(
+      messages.map((message) => ({
+        discord_id: message.id,
+        channel_id: channelId,
+        author_id: message.author_user?.id,
+        content: message.content,
+        discord_published_at: new Date(message.timestamp),
+      }))
+    )
+    .onConflict((oc) =>
+      oc
+        .column("discord_id")
+        .doUpdateSet({ content: (eb) => eb.ref("excluded.content") })
+    )
+    .execute();
 }
