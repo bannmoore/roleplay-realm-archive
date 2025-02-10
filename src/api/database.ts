@@ -3,25 +3,27 @@ import { DB, Servers } from "kysely-codegen";
 import { Pool } from "pg";
 import { DiscordChannel, DiscordUser } from "./discord";
 import { MessageWithUser } from "@/app/servers/[id]/actions";
+import { parse } from "pg-connection-string";
 
+const dbConfig = parse(process.env.DATABASE_URL || "");
 const db = new Kysely<DB>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      // TODO: https://github.com/typeorm/typeorm/issues/9761
-      // TODO: https://github.com/brianc/node-postgres/issues/3355
-      // connectionString: process.env.DATABASE_URL,
-      database: process.env.DATABASE_DB,
-      host: process.env.DATABASE_HOST,
-      user: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      port: Number(process.env.DATABASE_PORT || "5432"),
-      ssl:
-        process.env.DATABASE_USE_SSL === "TRUE"
-          ? {
-              rejectUnauthorized: true,
-              ca: process.env.DATABASE_CERT,
-            }
-          : undefined,
+      // I'd like to use connectionString directly, but there seems to be an
+      // underlying issue in node-postgres that prevents it from playing
+      // nice with ssl certs:
+      // https://github.com/brianc/node-postgres/pull/2709
+      database: dbConfig.database || "",
+      host: dbConfig.host || "",
+      user: dbConfig.user,
+      password: dbConfig.password,
+      port: Number(dbConfig.port || "5432"),
+      ssl: dbConfig.ssl
+        ? {
+            rejectUnauthorized: true,
+            ca: process.env.DATABASE_CERT,
+          }
+        : undefined,
     }),
   }),
 });
