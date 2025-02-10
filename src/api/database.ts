@@ -7,7 +7,21 @@ import { MessageWithUser } from "@/app/servers/[id]/actions";
 const db = new Kysely<DB>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
+      // TODO: https://github.com/typeorm/typeorm/issues/9761
+      // TODO: https://github.com/brianc/node-postgres/issues/3355
+      // connectionString: process.env.DATABASE_URL,
+      database: process.env.DATABASE_DB,
+      host: process.env.DATABASE_HOST,
+      user: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      port: Number(process.env.DATABASE_PORT || "5432"),
+      ssl:
+        process.env.DATABASE_USE_SSL === "TRUE"
+          ? {
+              rejectUnauthorized: true,
+              ca: process.env.DATABASE_CERT,
+            }
+          : undefined,
     }),
   }),
 });

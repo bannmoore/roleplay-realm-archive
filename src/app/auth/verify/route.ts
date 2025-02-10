@@ -40,8 +40,12 @@ export async function GET(request: Request) {
       expiresAt,
     });
 
+    // TODO: issue - https://github.com/vercel/next.js/issues/54450
     const response = NextResponse.redirect(
-      new URL("/auth/success", request.url)
+      new URL("/auth/success", process.env.BASE_URL),
+      {
+        status: 302,
+      }
     );
 
     response.cookies.set("token", tokenData.access_token, {
@@ -61,7 +65,10 @@ export async function GET(request: Request) {
     if (err instanceof Error) message = err.message;
 
     return NextResponse.redirect(
-      new URL(`/auth/error?description=${message}`, request.url)
+      new URL(`/auth/error?description=${message}`, process.env.BASE_URL),
+      {
+        status: 302,
+      }
     );
   }
 }
