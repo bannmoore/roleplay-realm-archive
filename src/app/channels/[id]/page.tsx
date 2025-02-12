@@ -1,4 +1,4 @@
-import { getChannel, getMessages } from "@/api/database";
+import { getChannel, getMessages } from "@/clients/database";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

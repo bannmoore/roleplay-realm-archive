@@ -1,8 +1,8 @@
 "use server";
 
-import { upsertChannel, upsertMessages, upsertUsers } from "@/api/database";
-import { DiscordChannel, DiscordMessage } from "@/api/discord-types";
-import discord from "@/api/discord-client";
+import { upsertChannel, upsertMessages, upsertUsers } from "@/clients/database";
+import { DiscordChannel, DiscordMessage } from "@/clients/discord-types";
+import discord from "@/clients/discord-client";
 import { Selectable } from "kysely";
 import { Users } from "kysely-codegen";
 

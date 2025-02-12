@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import discord from "./api/discord-client";
+import discord from "./clients/discord-client";
 
 export default async function middleware(req: NextRequest) {
   const token = (await cookies()).get("token")?.value;

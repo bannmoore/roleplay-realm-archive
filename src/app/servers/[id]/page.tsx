@@ -1,4 +1,4 @@
-import { getChannels, getServer } from "@/api/database";
+import { getChannels, getServer } from "@/clients/database";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { AddChannelSection } from "./AddChannelSection";

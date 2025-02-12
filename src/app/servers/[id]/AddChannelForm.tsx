@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { getChannelOptions, syncChannel } from "./actions";
-import { DiscordChannel } from "@/api/discord-types";
+import { DiscordChannel } from "@/clients/discord-types";
 
 export function AddChannelForm({
   serverDiscordId,

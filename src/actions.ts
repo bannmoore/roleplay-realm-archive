@@ -1,9 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { DiscordGuild } from "./api/discord-types";
-import { upsertServer } from "./api/database";
-import discord from "./api/discord-client";
+import { DiscordGuild } from "./clients/discord-types";
+import { upsertServer } from "./clients/database";
+import discord from "./clients/discord-client";
 
 export async function getChannelById(guildId: string) {
   const token = (await cookies()).get("token")?.value;

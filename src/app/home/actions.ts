@@ -1,7 +1,7 @@
 "use server";
 
-import { deactivateServers, upsertServer } from "@/api/database";
-import discord from "@/api/discord-client";
+import { deactivateServers, upsertServer } from "@/clients/database";
+import discord from "@/clients/discord-client";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {

@@ -1,6 +1,6 @@
-import { upsertSession, upsertUser } from "@/api/database";
+import { upsertSession, upsertUser } from "@/clients/database";
 import { NextResponse } from "next/server";
-import discord from "@/api/discord-client";
+import discord from "@/clients/discord-client";
 
 export async function GET(request: Request) {
   try {

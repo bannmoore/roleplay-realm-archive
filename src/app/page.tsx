@@ -1,4 +1,4 @@
-import { getServers } from "@/api/database";
+import { getServers } from "@/clients/database";
 import { RefreshServersButton } from "@/app/home/RefreshServersButton";
 import { Selectable } from "kysely";
 import { Servers } from "kysely-codegen";
