@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import {
   DiscordChannel,
   DiscordGuild,
@@ -9,11 +10,27 @@ import {
 let userToken: string | null = null;
 
 class DiscordClient {
-  private apiUrl: string = "https://discord.com/api/v10";
-  private botToken: string;
+  private _apiUrl: string = "https://discord.com/api/v10";
+  private _baseUrl: string;
+  private _botToken: string;
+  private _clientId: string;
+  private _clientSecret: string;
 
-  constructor({ botToken }: { botToken: string }) {
-    this.botToken = botToken;
+  constructor({
+    baseUrl,
+    botToken,
+    clientId,
+    clientSecret,
+  }: {
+    baseUrl: string;
+    botToken: string;
+    clientId: string;
+    clientSecret: string;
+  }) {
+    this._baseUrl = baseUrl;
+    this._botToken = botToken;
+    this._clientId = clientId;
+    this._clientSecret = clientSecret;
   }
 
   hasUserToken() {
@@ -25,14 +42,14 @@ class DiscordClient {
   }
 
   async exhangeAuthCodeForToken(code: string): Promise<DiscordTokenResponse> {
-    const response = await fetch(`${this.apiUrl}/oauth2/token`, {
+    const response = await fetch(`${this._apiUrl}/oauth2/token`, {
       method: "post",
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code: code ?? "",
-        redirect_uri: `${process.env.BASE_URL}/auth/verify`,
-        client_id: process.env.DISCORD_CLIENT_ID || "",
-        client_secret: process.env.DISCORD_CLIENT_SECRET || "",
+        redirect_uri: `${this._baseUrl}/auth/verify`,
+        client_id: this._clientId,
+        client_secret: this._clientSecret,
       }),
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -74,7 +91,7 @@ class DiscordClient {
       return null;
     }
 
-    const response = await fetch(`${process.env.DISCORD_API_URL}${path}`, {
+    const response = await fetch(`${this._apiUrl}${path}`, {
       method: "get",
       headers: {
         Authorization: `Bearer ${userToken}`,
@@ -86,10 +103,10 @@ class DiscordClient {
   }
 
   private async getWithBotAuth(path: string) {
-    const response = await fetch(`${process.env.DISCORD_API_URL}${path}`, {
+    const response = await fetch(`${this._apiUrl}${path}`, {
       method: "get",
       headers: {
-        Authorization: `Bot ${this.botToken}`,
+        Authorization: `Bot ${this._botToken}`,
         Accept: "application/json",
       },
     });
@@ -100,7 +117,10 @@ class DiscordClient {
 
 const discord = Object.freeze(
   new DiscordClient({
-    botToken: process.env.DISCORD_BOT_TOKEN || "",
+    baseUrl: config.baseUrl,
+    botToken: config.discordBotToken,
+    clientId: config.discordClientId,
+    clientSecret: config.discordClientSecret,
   })
 );
 

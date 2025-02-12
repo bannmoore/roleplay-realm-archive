@@ -4,11 +4,18 @@ import { Pool } from "pg";
 import { DiscordChannel, DiscordUser } from "./discord-types";
 import { MessageWithUser } from "@/app/servers/[id]/actions";
 import { parse } from "pg-connection-string";
+import { config } from "@/config";
 
 class DatabaseClient {
   private _db: Kysely<DB>;
 
-  constructor({ connectionString }: { connectionString: string }) {
+  constructor({
+    connectionString,
+    cert,
+  }: {
+    connectionString: string;
+    cert: string;
+  }) {
     const dbConfig = parse(connectionString);
     this._db = new Kysely<DB>({
       dialect: new PostgresDialect({
@@ -25,7 +32,7 @@ class DatabaseClient {
           ssl: dbConfig.ssl
             ? {
                 rejectUnauthorized: true,
-                ca: process.env.DATABASE_CERT,
+                ca: cert,
               }
             : undefined,
         }),
@@ -234,7 +241,8 @@ class DatabaseClient {
 
 const database = Object.freeze(
   new DatabaseClient({
-    connectionString: process.env.DATABASE_URL || "",
+    connectionString: config.databaseUrl,
+    cert: config.databaseCert,
   })
 );
 

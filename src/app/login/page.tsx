@@ -1,8 +1,10 @@
+import { config } from "@/config";
+
 export default function LoginPage() {
-  const clientId = process.env.DISCORD_CLIENT_ID;
-  const state = process.env.DISCORD_STATE;
+  const clientId = config.discordClientId;
+  const state = config.discordState;
   const scope = encodeURIComponent("identify guilds");
-  const redirectUri = encodeURIComponent(`${process.env.BASE_URL}/auth/verify`);
+  const redirectUri = encodeURIComponent(`${config.baseUrl}/auth/verify`);
 
   return (
     <main>

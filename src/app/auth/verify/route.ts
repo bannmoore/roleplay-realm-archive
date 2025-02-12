@@ -1,6 +1,7 @@
 import database from "@/clients/database";
 import { NextResponse } from "next/server";
 import discord from "@/clients/discord-client";
+import { config } from "@/config";
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       throw new Error("Missing code");
     }
 
-    if (state !== process.env.DISCORD_STATE) {
+    if (state !== config.discordState) {
       throw new Error("Invalid state");
     }
 
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
 
     // TODO: issue - https://github.com/vercel/next.js/issues/54450
     const response = NextResponse.redirect(
-      new URL("/auth/success", process.env.BASE_URL),
+      new URL("/auth/success", config.baseUrl),
       {
         status: 302,
       }
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
 
     response.cookies.set("token", tokenData.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: config.env === "production",
       maxAge: tokenData.expires_in,
       path: "/",
       sameSite: "strict",
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
     if (err instanceof Error) message = err.message;
 
     return NextResponse.redirect(
-      new URL(`/auth/error?description=${message}`, process.env.BASE_URL),
+      new URL(`/auth/error?description=${message}`, config.baseUrl),
       {
         status: 302,
       }
