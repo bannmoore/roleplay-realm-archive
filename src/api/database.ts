@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect, Selectable } from "kysely";
 import { DB, Servers } from "kysely-codegen";
 import { Pool } from "pg";
-import { DiscordChannel, DiscordUser } from "./discord";
+import { DiscordChannel, DiscordUser } from "./discord-types";
 import { MessageWithUser } from "@/app/servers/[id]/actions";
 import { parse } from "pg-connection-string";
 

@@ -1,6 +1,6 @@
 import { upsertSession, upsertUser } from "@/api/database";
-import { getDiscordUser, exhangeAuthCodeForToken } from "@/api/discord";
 import { NextResponse } from "next/server";
+import discord from "@/api/discord-client";
 
 export async function GET(request: Request) {
   try {
@@ -23,8 +23,11 @@ export async function GET(request: Request) {
       throw new Error("Invalid state");
     }
 
-    const tokenData = await exhangeAuthCodeForToken(code);
-    const discordUser = await getDiscordUser(tokenData.access_token);
+    const tokenData = await discord.exhangeAuthCodeForToken(code);
+
+    discord.setUserToken(tokenData.access_token);
+
+    const discordUser = await discord.getUser();
 
     const { id } = await upsertUser({
       discordId: discordUser.id,

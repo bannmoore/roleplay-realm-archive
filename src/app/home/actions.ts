@@ -1,13 +1,13 @@
 "use server";
 
 import { deactivateServers, upsertServer } from "@/api/database";
-import { getDiscordGuilds } from "@/api/discord";
+import discord from "@/api/discord-client";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {
   await deactivateServers();
 
-  const guilds = await getDiscordGuilds();
+  const guilds = await discord.getGuilds();
 
   await Promise.all(
     guilds.map((g) =>

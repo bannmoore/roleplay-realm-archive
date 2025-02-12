@@ -1,17 +1,13 @@
 "use server";
 
 import { upsertChannel, upsertMessages, upsertUsers } from "@/api/database";
-import {
-  DiscordChannel,
-  DiscordMessage,
-  getDiscordChannels,
-  getDiscordMessages,
-} from "@/api/discord";
+import { DiscordChannel, DiscordMessage } from "@/api/discord-types";
+import discord from "@/api/discord-client";
 import { Selectable } from "kysely";
 import { Users } from "kysely-codegen";
 
 export async function getChannelOptions(serverDiscordId: string) {
-  const all = await getDiscordChannels(serverDiscordId);
+  const all = await discord.getChannels(serverDiscordId);
   return all.filter((c) => c.parent_id);
 }
 
@@ -27,7 +23,7 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
     throw new Error("Failed to insert channel.");
   }
 
-  const messages = await getDiscordMessages(channel.id);
+  const messages = await discord.getMessages(channel.id);
   const authors = messages
     .filter(
       (message, index, self) =>
