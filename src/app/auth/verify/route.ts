@@ -1,7 +1,7 @@
 import database from "@/clients/database";
-import { NextResponse } from "next/server";
 import discord from "@/clients/discord-client";
 import { config } from "@/config";
+import { redirect } from "@/util";
 
 export async function GET(request: Request) {
   try {
@@ -44,13 +44,7 @@ export async function GET(request: Request) {
       expiresAt,
     });
 
-    // TODO: issue - https://github.com/vercel/next.js/issues/54450
-    const response = NextResponse.redirect(
-      new URL("/auth/success", config.baseUrl),
-      {
-        status: 302,
-      }
-    );
+    const response = redirect("/auth/success");
 
     response.cookies.set("token", tokenData.access_token, {
       httpOnly: true,
@@ -68,11 +62,6 @@ export async function GET(request: Request) {
     let message = "Unknown Error";
     if (err instanceof Error) message = err.message;
 
-    return NextResponse.redirect(
-      new URL(`/auth/error?description=${message}`, config.baseUrl),
-      {
-        status: 302,
-      }
-    );
+    return redirect(`/auth/error?description=${message}`);
   }
 }
