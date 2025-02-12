@@ -1,4 +1,4 @@
-import { getChannel, getMessages } from "@/clients/database";
+import database from "@/clients/database";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,13 +8,13 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const channel = await getChannel(id);
+  const channel = await database.getChannel(id);
 
   if (!channel) {
     return notFound();
   }
 
-  const messages = await getMessages(channel.id);
+  const messages = await database.getMessages(channel.id);
 
   return (
     <>

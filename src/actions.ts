@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { DiscordGuild } from "./clients/discord-types";
-import { upsertServer } from "./clients/database";
+import database from "./clients/database";
 import discord from "./clients/discord-client";
 
 export async function getChannelById(guildId: string) {
@@ -17,7 +17,7 @@ export async function getChannelById(guildId: string) {
 }
 
 export async function addServer(guild: DiscordGuild) {
-  upsertServer({
+  database.upsertServer({
     discordId: guild.id,
     name: guild.name,
     iconHash: guild.icon,

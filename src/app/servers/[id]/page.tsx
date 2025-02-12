@@ -1,4 +1,4 @@
-import { getChannels, getServer } from "@/clients/database";
+import database from "@/clients/database";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { AddChannelSection } from "./AddChannelSection";
@@ -10,13 +10,13 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const server = await getServer(id);
+  const server = await database.getServer(id);
 
   if (!server) {
     return notFound();
   }
 
-  const channels = await getChannels(server.id);
+  const channels = await database.getChannels(server.id);
 
   return (
     <>

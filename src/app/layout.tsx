@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { getCurrentUser } from "@/clients/database";
+import database from "@/clients/database";
 import { cookies } from "next/headers";
 
 const geistSans = Geist({
@@ -29,7 +29,7 @@ export default async function RootLayout({
   const token = (await cookies()).get("token")?.value;
 
   if (token) {
-    user = await getCurrentUser(token);
+    user = await database.getCurrentUser(token);
   }
 
   return (

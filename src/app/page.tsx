@@ -1,4 +1,4 @@
-import { getServers } from "@/clients/database";
+import database from "@/clients/database";
 import { RefreshServersButton } from "@/app/home/RefreshServersButton";
 import { Selectable } from "kysely";
 import { Servers } from "kysely-codegen";
@@ -11,7 +11,7 @@ export default async function HomePage() {
   const token = (await cookies()).get("token")?.value;
 
   if (token) {
-    servers = await getServers();
+    servers = await database.getServers();
   }
 
   return (

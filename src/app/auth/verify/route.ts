@@ -1,4 +1,4 @@
-import { upsertSession, upsertUser } from "@/clients/database";
+import database from "@/clients/database";
 import { NextResponse } from "next/server";
 import discord from "@/clients/discord-client";
 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
     const discordUser = await discord.getUser();
 
-    const { id } = await upsertUser({
+    const { id } = await database.upsertUser({
       discordId: discordUser.id,
       discordUsername: discordUser.username,
     });
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     const expiresAt = new Date();
     expiresAt.setSeconds(expiresAt.getSeconds() + tokenData.expires_in);
 
-    await upsertSession({
+    await database.upsertSession({
       userId: id,
       token: tokenData.access_token,
       expiresAt,

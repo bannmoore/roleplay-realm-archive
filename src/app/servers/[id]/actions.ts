@@ -1,6 +1,6 @@
 "use server";
 
-import { upsertChannel, upsertMessages, upsertUsers } from "@/clients/database";
+import database from "@/clients/database";
 import { DiscordChannel, DiscordMessage } from "@/clients/discord-types";
 import discord from "@/clients/discord-client";
 import { Selectable } from "kysely";
@@ -16,7 +16,7 @@ export type MessageWithUser = DiscordMessage & {
 };
 
 export async function syncChannel(serverId: string, channel: DiscordChannel) {
-  const channelResult = await upsertChannel(serverId, channel);
+  const channelResult = await database.upsertChannel(serverId, channel);
 
   if (!channelResult) {
     throw new Error("Failed to insert channel.");
@@ -30,7 +30,7 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
     )
     .map((message) => message.author);
 
-  const usersResult = await upsertUsers(authors);
+  const usersResult = await database.upsertUsers(authors);
 
   const messagesWithUsers: MessageWithUser[] = messages
     .map((message) => ({
@@ -42,7 +42,7 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
     }))
     .filter((message) => message.author_user && message.content);
 
-  await upsertMessages(channelResult.id, messagesWithUsers);
+  await database.upsertMessages(channelResult.id, messagesWithUsers);
 
   return;
 }
