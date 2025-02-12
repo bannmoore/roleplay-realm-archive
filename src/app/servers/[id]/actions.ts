@@ -16,7 +16,6 @@ export type MessageWithUser = DiscordMessage & {
 };
 
 export async function syncChannel(serverId: string, channel: DiscordChannel) {
-  console.log("upsertChannel", serverId, channel);
   const channelResult = await upsertChannel(serverId, channel);
 
   if (!channelResult) {
