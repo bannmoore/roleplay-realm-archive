@@ -5,6 +5,7 @@ import { DiscordChannel, DiscordMessage } from "@/clients/discord-types";
 import discord from "@/clients/discord-client";
 import { Selectable } from "kysely";
 import { Users } from "kysely-codegen";
+import { revalidatePath } from "next/cache";
 
 export async function getChannelOptions(serverDiscordId: string) {
   const all = await discord.getChannels(serverDiscordId);
@@ -44,5 +45,5 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
 
   await database.upsertMessages(channelResult.id, messagesWithUsers);
 
-  return;
+  revalidatePath(`servers/${serverId}`, "page");
 }

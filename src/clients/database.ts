@@ -202,6 +202,7 @@ class DatabaseClient {
       .selectFrom("inserted")
       .selectAll()
       .union(this._db.selectFrom("channels").selectAll())
+      .where("discord_id", "=", channel.id)
       .executeTakeFirst();
   }
 
