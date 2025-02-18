@@ -1,18 +1,10 @@
 import database from "@/clients/database";
 import { RefreshServersButton } from "@/app/home/RefreshServersButton";
-import { Selectable } from "kysely";
-import { Servers } from "kysely-codegen";
-import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
 export default async function HomePage() {
-  let servers: Selectable<Servers>[] = [];
-  const token = (await cookies()).get("token")?.value;
-
-  if (token) {
-    servers = await database.getServers();
-  }
+  const servers = await database.getServers();
 
   return (
     <>

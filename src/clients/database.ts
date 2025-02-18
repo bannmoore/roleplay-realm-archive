@@ -40,13 +40,12 @@ class DatabaseClient {
     });
   }
 
-  async getCurrentUser(token: string) {
+  async getCurrentUser(discordId: string) {
     return this._db
       .selectFrom("users")
-      .innerJoin("sessions", "sessions.user_id", "users.id")
-      .where("sessions.token", "=", token)
+      .where("discord_id", "=", discordId)
       .selectAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
   }
 
   async upsertUser({
