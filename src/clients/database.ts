@@ -177,6 +177,49 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
+  /*
+  WITH channel_messages AS (
+    SELECT *
+    FROM messages
+    WHERE channel_id = 5
+  )
+  SELECT
+    channels.*,
+    (SELECT COUNT(*) FROM channel_messages) AS total_messages,
+    (SELECT discord_published_at FROM channel_messages ORDER BY discord_published_at ASC LIMIT 1) AS first_message_at,
+    (SELECT discord_published_at FROM channel_messages ORDER BY discord_published_at DESC LIMIT 1) AS last_message_at
+  FROM channels
+  WHERE id = 5;
+  */
+  async getChannelWithMetadata(channelId: string) {
+    return this._db
+      .with("channel_messages", (db) =>
+        db
+          .selectFrom("messages")
+          .selectAll()
+          .where("channel_id", "=", channelId)
+      )
+      .selectFrom("channels")
+      .selectAll()
+      .select(({ selectFrom, fn }) => [
+        selectFrom("channel_messages")
+          .select(fn.countAll().as("count"))
+          .as("total_messages"),
+        selectFrom("channel_messages")
+          .select("discord_published_at")
+          .orderBy("discord_published_at", "asc")
+          .limit(1)
+          .as("first_message_at"),
+        selectFrom("channel_messages")
+          .select("discord_published_at")
+          .orderBy("discord_published_at", "desc")
+          .limit(1)
+          .as("last_message_at"),
+      ])
+      .where("id", "=", channelId)
+      .executeTakeFirst();
+  }
+
   async getChannels(serverId: string) {
     return this._db
       .selectFrom("channels")
