@@ -10,13 +10,18 @@ export async function refreshServers() {
   const guilds = await discord.getGuilds();
 
   await Promise.all(
-    guilds.map((g) =>
-      database.upsertServer({
+    guilds.map(async (g) => {
+      const server = await database.upsertServer({
         discordId: g.id,
         name: g.name,
         iconHash: g.icon,
-      })
-    )
+      });
+
+      const members = await discord.getGuildMembers(server.discord_id);
+      await database.upsertUsers(members);
+
+      return;
+    })
   );
 
   revalidatePath("/");

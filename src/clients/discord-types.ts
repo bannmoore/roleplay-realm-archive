@@ -6,12 +6,18 @@ export type DiscordTokenResponse = {
   scope: string;
 };
 
+// https://discord.com/developers/docs/resources/guild#guild-member-object
+export type DiscordGuildMember = {
+  user: DiscordUser;
+};
+
 export type DiscordUser = {
   id: string;
   // TODO:: hash, https://discord.com/developers/docs/reference#image-formatting
   username: string;
   avatar?: string;
   global_name: string;
+  bot?: boolean;
 };
 
 export type DiscordGuild = {

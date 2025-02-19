@@ -153,18 +153,30 @@ class DatabaseClient {
     iconHash: string;
   }) {
     return this._db
-      .insertInto("servers")
-      .columns(["discord_id", "name", "icon_hash", "active"])
-      .values({
-        discord_id: discordId,
-        name,
-        icon_hash: iconHash,
-        active: true,
-      })
-      .onConflict((oc) =>
-        oc
-          .column("discord_id")
-          .doUpdateSet({ name: name, icon_hash: iconHash, active: true })
+      .with("inserted", (db) =>
+        db
+          .insertInto("servers")
+          .columns(["discord_id", "name", "icon_hash", "active"])
+          .values({
+            discord_id: discordId,
+            name,
+            icon_hash: iconHash,
+            active: true,
+          })
+          .onConflict((oc) =>
+            oc
+              .column("discord_id")
+              .doUpdateSet({ name: name, icon_hash: iconHash, active: true })
+          )
+          .returningAll()
+      )
+      .selectFrom("inserted")
+      .selectAll()
+      .union(
+        this._db
+          .selectFrom("servers")
+          .selectAll()
+          .where("discord_id", "=", discordId)
       )
       .executeTakeFirstOrThrow();
   }

@@ -2,6 +2,7 @@ import { config } from "@/config";
 import {
   DiscordChannel,
   DiscordGuild,
+  DiscordGuildMember,
   DiscordMessage,
   DiscordTokenResponse,
   DiscordUser,
@@ -75,6 +76,16 @@ class DiscordClient {
 
   async getGuilds(): Promise<DiscordGuild[]> {
     return this.getWithBotAuth("/users/@me/guilds");
+  }
+
+  async getGuildMembers(guildId: string): Promise<DiscordUser[]> {
+    const response: DiscordGuildMember[] = await this.getWithBotAuth(
+      `/guilds/${guildId}/members?limit=100`
+    );
+
+    return response
+      .map((member) => member.user)
+      .filter((member) => !member.bot);
   }
 
   async getChannels(guildId: string): Promise<DiscordChannel[]> {
