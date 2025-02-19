@@ -1,12 +1,3 @@
-// https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
-export type DiscordTokenResponse = {
-  token_type: "Bearer";
-  access_token: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-};
-
 // https://discord.com/developers/docs/resources/guild#guild-member-object
 export type DiscordGuildMember = {
   user: DiscordUser;

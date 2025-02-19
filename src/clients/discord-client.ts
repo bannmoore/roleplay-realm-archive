@@ -4,7 +4,6 @@ import {
   DiscordGuild,
   DiscordGuildMember,
   DiscordMessage,
-  DiscordTokenResponse,
   DiscordUser,
 } from "./discord-types";
 
@@ -12,26 +11,10 @@ let userToken: string | null = null;
 
 class DiscordClient {
   private _apiUrl: string = "https://discord.com/api/v10";
-  private _baseUrl: string;
   private _botToken: string;
-  private _clientId: string;
-  private _clientSecret: string;
 
-  constructor({
-    baseUrl,
-    botToken,
-    clientId,
-    clientSecret,
-  }: {
-    baseUrl: string;
-    botToken: string;
-    clientId: string;
-    clientSecret: string;
-  }) {
-    this._baseUrl = baseUrl;
+  constructor({ botToken }: { botToken: string }) {
     this._botToken = botToken;
-    this._clientId = clientId;
-    this._clientSecret = clientSecret;
   }
 
   hasUserToken() {
@@ -40,30 +23,6 @@ class DiscordClient {
 
   setUserToken(token: string | null) {
     userToken = token;
-  }
-
-  async exhangeAuthCodeForToken(code: string): Promise<DiscordTokenResponse> {
-    const response = await fetch(`${this._apiUrl}/oauth2/token`, {
-      method: "post",
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code: code ?? "",
-        redirect_uri: `${this._baseUrl}/auth/verify`,
-        client_id: this._clientId,
-        client_secret: this._clientSecret,
-      }),
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-
-    const tokenPayload = await response.json();
-
-    if (!tokenPayload.access_token) {
-      throw new Error("Invalid token response");
-    }
-
-    return tokenPayload;
   }
 
   async getUser(): Promise<DiscordUser> {
@@ -134,10 +93,7 @@ class DiscordClient {
 
 const discord = Object.freeze(
   new DiscordClient({
-    baseUrl: config.baseUrl,
     botToken: config.discordBotToken,
-    clientId: config.discordClientId,
-    clientSecret: config.discordClientSecret,
   })
 );
 
