@@ -31,15 +31,13 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
     )
     .map((message) => message.author);
 
-  const usersResult = await database.upsertUsers(authors);
+  const users = await database.getUsers(authors.map((author) => author.id));
 
   const messagesWithUsers: MessageWithUser[] = messages
     .map((message) => ({
       ...message,
       content: message.content?.replace(/<@[0-9]+>/, "").trim(),
-      author_user: usersResult.find(
-        (row) => row.discord_id === message.author.id
-      ),
+      author_user: users.find((row) => row.discord_id === message.author.id),
     }))
     .filter((message) => message.author_user && message.content);
 

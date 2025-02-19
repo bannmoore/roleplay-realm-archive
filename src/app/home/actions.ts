@@ -5,9 +5,10 @@ import discord from "@/clients/discord-client";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {
-  await database.deactivateServers();
-
   const guilds = await discord.getGuilds();
+
+  await database.deactivateServers();
+  await database.deleteServersUsers();
 
   await Promise.all(
     guilds.map(async (g) => {
@@ -18,7 +19,8 @@ export async function refreshServers() {
       });
 
       const members = await discord.getGuildMembers(server.discord_id);
-      await database.upsertUsers(members);
+      const users = await database.upsertUsers(members);
+      await database.upsertServersUsers(server.id, users);
 
       return;
     })

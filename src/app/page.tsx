@@ -2,9 +2,17 @@ import database from "@/clients/database";
 import { RefreshServersButton } from "@/app/home/RefreshServersButton";
 import Image from "next/image";
 import Link from "next/link";
+import { checkAuthenticated } from "@/util";
+import { notFound } from "next/navigation";
 
 export default async function HomePage() {
-  const servers = await database.getServers();
+  const user = await checkAuthenticated();
+
+  if (!user) {
+    return notFound();
+  }
+
+  const servers = await database.getServers(user.id);
 
   return (
     <>

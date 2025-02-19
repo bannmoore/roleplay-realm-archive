@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { config } from "./config";
+import { auth } from "./auth";
+import database from "./clients/database";
 
 /**
  * Returns a redirect response for the configured BaseUrl + Path.
@@ -10,4 +12,16 @@ export function redirect(path: string) {
   return NextResponse.redirect(new URL(path, config.baseUrl), {
     status: 302,
   });
+}
+
+/** Returns the database user if currently logged in, otherwise undefined */
+export async function checkAuthenticated() {
+  let user = undefined;
+  const session = await auth();
+
+  if (session?.user?.id) {
+    user = await database.getCurrentUser(session?.user?.id);
+  }
+
+  return user;
 }

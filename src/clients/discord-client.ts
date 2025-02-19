@@ -122,7 +122,13 @@ class DiscordClient {
       },
     });
 
-    return response.json();
+    const json = await response.json();
+
+    if (json.message === "401: Unauthorized") {
+      throw new Error("Bot unauthorized");
+    }
+
+    return json;
   }
 }
 

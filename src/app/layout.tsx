@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import database from "@/clients/database";
-import { auth, signIn, signOut } from "@/auth";
+import { signIn, signOut } from "@/auth";
+import { checkAuthenticated } from "@/util";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,12 +25,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let user = null;
-  const session = await auth();
-
-  if (session?.user?.id) {
-    user = await database.getCurrentUser(session?.user?.id);
-  }
+  const user = await checkAuthenticated();
 
   return (
     <html lang="en">

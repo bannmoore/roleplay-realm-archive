@@ -1,5 +1,5 @@
 import { Kysely, PostgresDialect, Selectable } from "kysely";
-import { DB, Servers } from "kysely-codegen";
+import { DB, Servers, Users } from "kysely-codegen";
 import { Pool } from "pg";
 import { DiscordChannel, DiscordUser } from "./discord-types";
 import { MessageWithUser } from "@/app/servers/[id]/actions";
@@ -46,6 +46,14 @@ class DatabaseClient {
       .where("discord_id", "=", discordId)
       .selectAll()
       .executeTakeFirst();
+  }
+
+  async getUsers(discordIds: string[]) {
+    return this._db
+      .selectFrom("users")
+      .selectAll()
+      .where("discord_id", "in", discordIds)
+      .execute();
   }
 
   async upsertUser({
@@ -130,8 +138,20 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
-  async getServers(): Promise<Selectable<Servers>[]> {
-    return this._db.selectFrom("servers").selectAll().execute();
+  async getServers(userId: string): Promise<Selectable<Servers>[]> {
+    return this._db
+      .selectFrom("servers")
+      .selectAll("servers")
+      .innerJoin("servers_users", "servers_users.server_id", "servers.id")
+      .where("servers_users.user_id", "=", userId)
+      .where((eb) =>
+        eb("servers_users.user_id", "=", userId).and(
+          "servers.active",
+          "=",
+          true
+        )
+      )
+      .execute();
   }
 
   async deactivateServers() {
@@ -179,6 +199,25 @@ class DatabaseClient {
           .where("discord_id", "=", discordId)
       )
       .executeTakeFirstOrThrow();
+  }
+
+  async upsertServersUsers(serverId: string, users: Selectable<Users>[]) {
+    return this._db
+      .insertInto("servers_users")
+      .values(
+        users.map((user) => ({
+          user_id: user.id,
+          server_id: serverId,
+        }))
+      )
+      .onConflict((oc) =>
+        oc.constraint("servers_users_user_id_server_id_key").doNothing()
+      )
+      .execute();
+  }
+
+  async deleteServersUsers() {
+    return this._db.deleteFrom("servers_users").execute();
   }
 
   async getChannel(channelId: string) {
