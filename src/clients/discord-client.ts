@@ -51,8 +51,17 @@ class DiscordClient {
     return this.getWithBotAuth(`/guilds/${guildId}/channels`);
   }
 
-  async getMessages(channelId: string): Promise<DiscordMessage[]> {
-    return this.getWithBotAuth(`/channels/${channelId}/messages?limit=10`);
+  async getMessages(
+    channelId: string,
+    { beforeId }: { beforeId?: string } = {}
+  ): Promise<DiscordMessage[]> {
+    let qs = `/channels/${channelId}/messages?limit=100`;
+
+    if (beforeId) {
+      qs = `${qs}&before=${beforeId}`;
+    }
+
+    return this.getWithBotAuth(qs);
   }
 
   private async getWithUserAuth(path: string) {

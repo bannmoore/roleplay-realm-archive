@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { refreshServers } from "./actions";
+import React, { useState } from "react";
+import { syncChannel } from "./actions";
+import { Selectable } from "kysely";
+import { Channels } from "kysely-codegen";
 
-export function RefreshServersButton() {
-  const [loading, setLoading] = useState(false);
+export default function SyncChannelButton({
+  channel,
+}: {
+  channel: Selectable<Channels>;
+}) {
+  const [isSyncing, setIsSyncing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,16 +32,17 @@ export function RefreshServersButton() {
           Servers updated successfully.
         </div>
       )}
-      {loading && <div>Working, please wait...</div>}
-
+      {isSyncing && <div>Syncing... this could take a while.</div>}
       <button
         type="button"
         onClick={async () => {
-          // TODO: Pop warning before refresh.
-          setError("");
           setSuccess(false);
-          setLoading(true);
-          await refreshServers()
+          setError("");
+          setIsSyncing(true);
+
+          await syncChannel({
+            channel,
+          })
             .then(() => setSuccess(true))
             .catch((err) => {
               // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
@@ -44,10 +51,10 @@ export function RefreshServersButton() {
 
               setError(message);
             })
-            .finally(() => setLoading(false));
+            .finally(() => setIsSyncing(false));
         }}
       >
-        Refresh Server List
+        Sync Channel
       </button>
     </>
   );

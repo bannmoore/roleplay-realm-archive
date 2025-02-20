@@ -1,10 +1,13 @@
 import { Kysely, PostgresDialect, Selectable } from "kysely";
 import { DB, Servers, Users } from "kysely-codegen";
 import { Pool } from "pg";
-import { DiscordChannel, DiscordUser } from "./discord-types";
-import { MessageWithUser } from "@/app/servers/[id]/actions";
+import { DiscordChannel, DiscordMessage, DiscordUser } from "./discord-types";
 import { parse } from "pg-connection-string";
 import { config } from "@/config";
+
+export type MessageWithUser = DiscordMessage & {
+  author_user: Selectable<Users>;
+};
 
 class DatabaseClient {
   private _db: Kysely<DB>;
@@ -53,6 +56,15 @@ class DatabaseClient {
       .selectFrom("users")
       .selectAll()
       .where("discord_id", "in", discordIds)
+      .execute();
+  }
+
+  async getServerUsers(serverId: string) {
+    return this._db
+      .selectFrom("users")
+      .selectAll("users")
+      .innerJoin("servers_users", "servers_users.user_id", "users.id")
+      .where("servers_users.server_id", "=", serverId)
       .execute();
   }
 
@@ -300,7 +312,25 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
-  async getMessages(channelId: string) {
+  async getRecentMessages(channelId: string) {
+    return this._db
+      .with("reversed", (db) =>
+        db
+          .selectFrom("messages")
+          .innerJoin("users", "messages.author_id", "users.id")
+          .selectAll("messages")
+          .select(["users.discord_username"])
+          .where("channel_id", "=", channelId)
+          .orderBy("discord_published_at desc")
+          .limit(2)
+      )
+      .selectFrom("reversed")
+      .selectAll()
+      .orderBy("discord_published_at asc")
+      .execute();
+  }
+
+  async getOldestMessage(channelId: string) {
     return this._db
       .selectFrom("messages")
       .innerJoin("users", "messages.author_id", "users.id")
@@ -308,8 +338,8 @@ class DatabaseClient {
       .select(["users.discord_username"])
       .where("channel_id", "=", channelId)
       .orderBy("discord_published_at asc")
-      .limit(10)
-      .execute();
+      .limit(1)
+      .executeTakeFirst();
   }
 
   async upsertMessages(channelId: string, messages: MessageWithUser[]) {
@@ -319,7 +349,7 @@ class DatabaseClient {
         messages.map((message) => ({
           discord_id: message.id,
           channel_id: channelId,
-          author_id: message.author_user?.id,
+          author_id: message.author_user.id,
           content: message.content,
           discord_published_at: new Date(message.timestamp),
         }))

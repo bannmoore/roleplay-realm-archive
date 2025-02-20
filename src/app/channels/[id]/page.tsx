@@ -1,6 +1,7 @@
 import database from "@/clients/database";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import SyncChannelButton from "./SyncChannelButton";
 
 export default async function Page({
   params,
@@ -14,7 +15,7 @@ export default async function Page({
     return notFound();
   }
 
-  const messages = await database.getMessages(channel.id);
+  const messages = await database.getRecentMessages(channel.id);
 
   return (
     <>
@@ -24,13 +25,15 @@ export default async function Page({
       </div>
 
       <div className="text-left">
+        <SyncChannelButton channel={channel} />
+
         <div className="mb-4">
           <div>Total messages: {channel.total_messages}</div>
           <div>First message: {channel.first_message_at?.toDateString()}</div>
           <div>Last message: {channel.last_message_at?.toDateString()}</div>
         </div>
 
-        <h2>Posts</h2>
+        <h2>Recent Posts</h2>
 
         <div className="mt-4 text-left">
           {messages.map((message) => (
