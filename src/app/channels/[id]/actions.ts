@@ -2,23 +2,25 @@
 
 import database, { MessageWithUser } from "@/clients/database";
 import discord from "@/clients/discord-client";
-import { Selectable } from "kysely";
-import { Channels } from "kysely-codegen";
 import { revalidatePath } from "next/cache";
 
 export async function syncChannel({
-  channel,
+  channelId,
+  channelDiscordId,
+  serverId,
 }: {
-  channel: Selectable<Channels>;
+  channelId: string;
+  channelDiscordId: string;
+  serverId: string;
 }) {
-  const authorUsers = await database.getServerUsers(channel.server_id);
+  const authorUsers = await database.getServerUsers(serverId);
 
-  const oldestMessage = await database.getOldestMessage(channel.id);
+  const oldestMessage = await database.getOldestMessage(channelId);
   let oldestMessageId = oldestMessage?.discord_id;
   let isSyncing = true;
 
   while (isSyncing) {
-    const newMessages = await discord.getMessages(channel.discord_id, {
+    const newMessages = await discord.getMessages(channelDiscordId, {
       beforeId: oldestMessageId,
     });
 
@@ -43,7 +45,7 @@ export async function syncChannel({
     });
 
     if (newMessagesWithUsers.length) {
-      await database.upsertMessages(channel.id, newMessagesWithUsers);
+      await database.upsertMessages(channelId, newMessagesWithUsers);
     }
 
     oldestMessageId = newMessages[newMessages.length - 1].id;
@@ -51,7 +53,7 @@ export async function syncChannel({
     await sleep(1000);
   }
 
-  revalidatePath(`channels/${channel.id}`, "page");
+  revalidatePath(`channels/${channelId}`, "page");
 }
 
 function sleep(ms: number) {
