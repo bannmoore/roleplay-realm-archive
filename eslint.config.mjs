@@ -11,6 +11,27 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["@/test/*"],
+        },
+      ],
+      "import/no-extraneous-dependencies": [
+        "error",
+        { devDependencies: false },
+      ],
+    },
+  },
+  {
+    files: ["**/src/test/**", "**/*.test.ts", "*.mjs"],
+    rules: {
+      "no-restricted-imports": "off",
+      "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -2,14 +2,9 @@
 
 import React, { useState } from "react";
 import { syncChannel } from "./actions";
-import { Selectable } from "kysely";
-import { Channels } from "kysely-codegen";
+import { Channel } from "@/dtos/channel";
 
-export default function SyncChannelButton({
-  channel,
-}: {
-  channel: Selectable<Channels>;
-}) {
+export default function SyncChannelButton({ channel }: { channel: Channel }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +36,9 @@ export default function SyncChannelButton({
           setIsSyncing(true);
 
           await syncChannel({
-            channel,
+            channelId: channel.id,
+            channelDiscordId: channel.discordId,
+            serverId: channel.serverId,
           })
             .then(() => setSuccess(true))
             .catch((err) => {

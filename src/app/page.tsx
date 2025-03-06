@@ -24,7 +24,7 @@ export default async function HomePage() {
         >
           <Image
             className="rounded-full mr-4"
-            src={`https://cdn.discordapp.com/icons/${server.discord_id}/${server.icon_hash}.png`}
+            src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.iconHash}.png`}
             alt={`${server.name} icon`}
             width={60}
             height={60}

@@ -17,7 +17,7 @@ export type DiscordUser = {
 export type DiscordGuild = {
   id: string;
   name: string;
-  icon: string;
+  icon?: string;
 };
 
 // https://discord.com/developers/docs/resources/channel#channels-resource

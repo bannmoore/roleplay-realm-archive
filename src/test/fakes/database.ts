@@ -1,32 +1,28 @@
 import { faker } from "@faker-js/faker";
 import { generateFake } from "../fakes";
-import { Selectable } from "kysely";
-import { Users, Messages } from "kysely-codegen";
 import { snowflake } from "./discord";
+import { User } from "@/dtos/user";
+import { Message } from "@/dtos/message";
 
 export function id() {
   return faker.number.int().toString();
 }
 
 export function fakeUser() {
-  return generateFake<Selectable<Users>>("User", {
-    created_at: faker.date.past(),
-    discord_id: snowflake(),
+  return generateFake<User>("User", {
+    discordId: snowflake(),
     id: id(),
-    updated_at: faker.date.past(),
-    discord_username: faker.internet.username(),
+    discordUsername: faker.internet.username(),
   });
 }
 
 export function fakeMessage() {
-  return generateFake<Selectable<Messages>>("Message", {
-    created_at: faker.date.past(),
-    updated_at: faker.date.past(),
+  return generateFake<Message>("Message", {
     id: id(),
-    discord_id: snowflake(),
-    discord_published_at: faker.date.past(),
+    discordId: snowflake(),
+    discordPublishedAt: faker.date.past(),
     content: faker.lorem.paragraphs(2),
-    author_id: id(),
-    channel_id: id(),
+    authorId: id(),
+    channelId: id(),
   });
 }

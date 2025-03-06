@@ -2,6 +2,7 @@
 
 import database from "@/clients/database";
 import discord from "@/clients/discord-client";
+import { userFromDiscordUser } from "@/dtos/user";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {
@@ -18,8 +19,10 @@ export async function refreshServers() {
         iconHash: g.icon,
       });
 
-      const members = await discord.getGuildMembers(server.discord_id);
-      const users = await database.upsertUsers(members);
+      const members = await discord.getGuildMembers(server.discordId);
+      const users = await database.upsertUsers(
+        members.map(userFromDiscordUser)
+      );
       await database.upsertServersUsers(server.id, users);
 
       return;

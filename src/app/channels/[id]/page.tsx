@@ -21,16 +21,16 @@ export default async function Page({
     <>
       <div className="mb-4">
         <h1 className="mb-4">{channel.name}</h1>
-        <Link href={`/servers/${channel.server_id}`}>Back</Link>
+        <Link href={`/servers/${channel.serverId}`}>Back</Link>
       </div>
 
       <div className="text-left">
         <SyncChannelButton channel={channel} />
 
         <div className="mb-4">
-          <div>Total messages: {channel.total_messages}</div>
-          <div>First message: {channel.first_message_at?.toDateString()}</div>
-          <div>Last message: {channel.last_message_at?.toDateString()}</div>
+          <div>Total messages: {channel.totalMessages}</div>
+          <div>First message: {channel.firstMessageAt?.toDateString()}</div>
+          <div>Last message: {channel.lastMessageAt?.toDateString()}</div>
         </div>
 
         <h2>Recent Posts</h2>
@@ -42,10 +42,10 @@ export default async function Page({
               className="mb-4 bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg"
             >
               <div className="flex mb-2">
-                <span className="flex-1">{message.discord_username}</span>
+                <span className="flex-1">{message.authorUsername}</span>
                 <span>
-                  {message.discord_published_at.toDateString()}{" "}
-                  {message.discord_published_at.toLocaleTimeString()}
+                  {message.discordPublishedAt.toDateString()}{" "}
+                  {message.discordPublishedAt.toLocaleTimeString()}
                 </span>
               </div>
               <p>{message.content}</p>

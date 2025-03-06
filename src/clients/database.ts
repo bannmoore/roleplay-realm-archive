@@ -1,13 +1,12 @@
-import { Kysely, PostgresDialect, Selectable } from "kysely";
-import { DB, Servers, Users } from "kysely-codegen";
+import { Kysely, PostgresDialect } from "kysely";
+import { DB } from "kysely-codegen";
 import { Pool } from "pg";
-import { DiscordChannel, DiscordMessage, DiscordUser } from "./discord-types";
 import { parse } from "pg-connection-string";
 import { config } from "@/config";
-
-export type MessageWithUser = DiscordMessage & {
-  author_user: Selectable<Users>;
-};
+import { UnsavedUser, User, userFromDbRow } from "@/dtos/user";
+import { Server, serverFromDbRow, UnsavedServer } from "@/dtos/server";
+import { Channel, channelFromDbRow, UnsavedChannel } from "@/dtos/channel";
+import { Message, messageFromDbRow, UnsavedMessage } from "@/dtos/message";
 
 class DatabaseClient {
   private _db: Kysely<DB>;
@@ -43,65 +42,78 @@ class DatabaseClient {
     });
   }
 
-  async getCurrentUser(discordId: string) {
-    return this._db
+  async getCurrentUser(discordId: string): Promise<User | undefined> {
+    const row = await this._db
       .selectFrom("users")
       .where("discord_id", "=", discordId)
       .selectAll()
       .executeTakeFirst();
+
+    return row ? userFromDbRow(row) : row;
   }
 
-  async getUsers(discordIds: string[]) {
-    return this._db
+  async getUsers(discordIds: string[]): Promise<User[]> {
+    const rows = await this._db
       .selectFrom("users")
       .selectAll()
       .where("discord_id", "in", discordIds)
       .execute();
+
+    return rows.map(userFromDbRow);
   }
 
-  async getServerUsers(serverId: string) {
-    return this._db
+  async getServerUsers(serverId: string): Promise<User[]> {
+    const rows = await this._db
       .selectFrom("users")
       .selectAll("users")
       .innerJoin("servers_users", "servers_users.user_id", "users.id")
       .where("servers_users.server_id", "=", serverId)
       .execute();
+
+    return rows.map(userFromDbRow);
   }
 
-  async upsertUser({
-    discordId,
-    discordUsername,
-  }: {
-    discordId: string;
-    discordUsername: string;
-  }) {
-    return this._db
-      .insertInto("users")
-      .columns(["discord_id", "discord_username"])
-      .values({
-        discord_id: discordId,
-        discord_username: discordUsername,
-      })
-      .returning("id")
-      .onConflict((oc) =>
-        oc
-          .column("discord_id")
-          .doUpdateSet({ discord_username: discordUsername })
+  async upsertUser(user: UnsavedUser): Promise<User> {
+    const inserted = await this._db
+      .with("inserted", (db) =>
+        db
+          .insertInto("users")
+          .columns(["discord_id", "discord_username"])
+          .values({
+            discord_id: user.discordId,
+            discord_username: user.discordUsername,
+          })
+          .onConflict((oc) =>
+            oc
+              .column("discord_id")
+              .doUpdateSet({ discord_username: user.discordUsername })
+          )
+          .returningAll()
+      )
+      .selectFrom("inserted")
+      .selectAll()
+      .union(
+        this._db
+          .selectFrom("users")
+          .selectAll()
+          .where("discord_id", "=", user.discordId)
       )
       .executeTakeFirstOrThrow();
+
+    return userFromDbRow(inserted);
   }
 
-  async upsertUsers(users: DiscordUser[]) {
-    const ids = users.map((user) => user.id);
+  async upsertUsers(users: UnsavedUser[]): Promise<User[]> {
+    const ids = users.map((user) => user.discordId);
 
-    return this._db
+    const inserted = await this._db
       .with("inserted", (db) =>
         db
           .insertInto("users")
           .values(
             users.map((user) => ({
-              discord_id: user.id,
-              discord_username: user.username,
+              discord_id: user.discordId,
+              discord_username: user.discordUsername,
             }))
           )
           .onConflict((oc) =>
@@ -115,43 +127,22 @@ class DatabaseClient {
       .selectAll()
       .union(this._db.selectFrom("users").selectAll().where("id", "in", ids))
       .execute();
+
+    return inserted.map(userFromDbRow);
   }
 
-  async upsertSession({
-    userId,
-    token,
-    expiresAt,
-  }: {
-    userId: string;
-    token: string;
-    expiresAt: Date;
-  }) {
-    return this._db
-      .insertInto("sessions")
-      .columns(["user_id", "token", "expires_at"])
-      .values({
-        user_id: userId,
-        token,
-        expires_at: expiresAt,
-      })
-      .onConflict((oc) =>
-        oc
-          .column("user_id")
-          .doUpdateSet({ token: token, expires_at: expiresAt })
-      )
-      .executeTakeFirstOrThrow();
-  }
-
-  async getServer(id: string) {
-    return this._db
+  async getServer(id: string): Promise<Server | undefined> {
+    const row = await this._db
       .selectFrom("servers")
       .selectAll()
       .where("id", "=", id)
       .executeTakeFirst();
+
+    return row ? serverFromDbRow(row) : row;
   }
 
-  async getServers(userId: string): Promise<Selectable<Servers>[]> {
-    return this._db
+  async getServers(userId: string): Promise<Server[]> {
+    const rows = await this._db
       .selectFrom("servers")
       .selectAll("servers")
       .innerJoin("servers_users", "servers_users.server_id", "servers.id")
@@ -164,10 +155,12 @@ class DatabaseClient {
         )
       )
       .execute();
+
+    return rows.map(serverFromDbRow);
   }
 
-  async deactivateServers() {
-    return this._db
+  async deactivateServers(): Promise<void> {
+    await this._db
       .updateTable("servers")
       .set({
         active: false,
@@ -175,30 +168,24 @@ class DatabaseClient {
       .execute();
   }
 
-  async upsertServer({
-    discordId,
-    name,
-    iconHash,
-  }: {
-    discordId: string;
-    name: string;
-    iconHash: string;
-  }) {
-    return this._db
+  async upsertServer(server: UnsavedServer): Promise<Server> {
+    const inserted = await this._db
       .with("inserted", (db) =>
         db
           .insertInto("servers")
           .columns(["discord_id", "name", "icon_hash", "active"])
           .values({
-            discord_id: discordId,
-            name,
-            icon_hash: iconHash,
+            discord_id: server.discordId,
+            name: server.name,
+            icon_hash: server.iconHash,
             active: true,
           })
           .onConflict((oc) =>
-            oc
-              .column("discord_id")
-              .doUpdateSet({ name: name, icon_hash: iconHash, active: true })
+            oc.column("discord_id").doUpdateSet({
+              name: server.name,
+              icon_hash: server.iconHash,
+              active: true,
+            })
           )
           .returningAll()
       )
@@ -208,13 +195,15 @@ class DatabaseClient {
         this._db
           .selectFrom("servers")
           .selectAll()
-          .where("discord_id", "=", discordId)
+          .where("discord_id", "=", server.discordId)
       )
       .executeTakeFirstOrThrow();
+
+    return serverFromDbRow(inserted);
   }
 
-  async upsertServersUsers(serverId: string, users: Selectable<Users>[]) {
-    return this._db
+  async upsertServersUsers(serverId: string, users: User[]): Promise<void> {
+    await this._db
       .insertInto("servers_users")
       .values(
         users.map((user) => ({
@@ -228,8 +217,8 @@ class DatabaseClient {
       .execute();
   }
 
-  async deleteServersUsers() {
-    return this._db.deleteFrom("servers_users").execute();
+  async deleteServersUsers(): Promise<void> {
+    await this._db.deleteFrom("servers_users").execute();
   }
 
   async getChannel(channelId: string) {
@@ -254,8 +243,10 @@ class DatabaseClient {
   FROM channels
   WHERE id = 5;
   */
-  async getChannelWithMetadata(channelId: string) {
-    return this._db
+  async getChannelWithMetadata(
+    channelId: string
+  ): Promise<Channel | undefined> {
+    const row = await this._db
       .with("channel_messages", (db) =>
         db
           .selectFrom("messages")
@@ -281,23 +272,39 @@ class DatabaseClient {
       ])
       .where("id", "=", channelId)
       .executeTakeFirst();
+
+    if (!row) {
+      return row;
+    }
+
+    return {
+      ...channelFromDbRow(row),
+      totalMessages: Number(row.total_messages),
+      firstMessageAt: row.first_message_at || undefined,
+      lastMessageAt: row.last_message_at || undefined,
+    };
   }
 
-  async getChannels(serverId: string) {
-    return this._db
+  async getChannels(serverId: string): Promise<Channel[]> {
+    const rows = await this._db
       .selectFrom("channels")
       .selectAll()
       .where("server_id", "=", serverId)
       .execute();
+
+    return rows.map(channelFromDbRow);
   }
 
-  async upsertChannel(serverId: string, channel: DiscordChannel) {
-    return this._db
+  async upsertChannel(
+    serverId: string,
+    channel: UnsavedChannel
+  ): Promise<Channel | undefined> {
+    const inserted = await this._db
       .with("inserted", (db) =>
         db
           .insertInto("channels")
           .values({
-            discord_id: channel.id,
+            discord_id: channel.discordId,
             server_id: serverId,
             name: channel.name,
             active: true,
@@ -308,12 +315,14 @@ class DatabaseClient {
       .selectFrom("inserted")
       .selectAll()
       .union(this._db.selectFrom("channels").selectAll())
-      .where("discord_id", "=", channel.id)
-      .executeTakeFirst();
+      .where("discord_id", "=", channel.discordId)
+      .executeTakeFirstOrThrow();
+
+    return channelFromDbRow(inserted);
   }
 
-  async getRecentMessages(channelId: string) {
-    return this._db
+  async getRecentMessages(channelId: string): Promise<Message[]> {
+    const rows = await this._db
       .with("reversed", (db) =>
         db
           .selectFrom("messages")
@@ -328,10 +337,15 @@ class DatabaseClient {
       .selectAll()
       .orderBy("discord_published_at asc")
       .execute();
+
+    return rows.map((row) => ({
+      ...messageFromDbRow(row),
+      authorUsername: row.discord_username || undefined,
+    }));
   }
 
-  async getOldestMessage(channelId: string) {
-    return this._db
+  async getOldestMessage(channelId: string): Promise<Message | undefined> {
+    const row = await this._db
       .selectFrom("messages")
       .innerJoin("users", "messages.author_id", "users.id")
       .selectAll("messages")
@@ -340,26 +354,34 @@ class DatabaseClient {
       .orderBy("discord_published_at asc")
       .limit(1)
       .executeTakeFirst();
+
+    return row ? messageFromDbRow(row) : row;
   }
 
-  async upsertMessages(channelId: string, messages: MessageWithUser[]) {
-    return this._db
+  async upsertMessages(
+    channelId: string,
+    messages: UnsavedMessage[]
+  ): Promise<Message[]> {
+    const rows = await this._db
       .insertInto("messages")
       .values(
         messages.map((message) => ({
-          discord_id: message.id,
+          discord_id: message.discordId,
           channel_id: channelId,
-          author_id: message.author_user.id,
+          author_id: message.authorId,
           content: message.content,
-          discord_published_at: new Date(message.timestamp),
+          discord_published_at: message.discordPublishedAt,
         }))
       )
+      .returningAll()
       .onConflict((oc) =>
         oc
           .column("discord_id")
           .doUpdateSet({ content: (eb) => eb.ref("excluded.content") })
       )
       .execute();
+
+    return rows.map(messageFromDbRow);
   }
 }
 

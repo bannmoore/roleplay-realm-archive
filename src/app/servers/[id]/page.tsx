@@ -24,7 +24,7 @@ export default async function Page({
         <h1 className="mb-4">{server.name}</h1>
         <Image
           className="rounded-full mx-auto"
-          src={`https://cdn.discordapp.com/icons/${server.discord_id}/${server.icon_hash}.png`}
+          src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.iconHash}.png`}
           alt={`${server.name} icon`}
           width={100}
           height={100}
@@ -32,7 +32,7 @@ export default async function Page({
       </div>
 
       <AddChannelSection
-        serverDiscordId={server.discord_id}
+        serverDiscordId={server.discordId}
         serverId={server.id}
       />
 

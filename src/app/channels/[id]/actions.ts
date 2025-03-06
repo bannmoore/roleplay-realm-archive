@@ -1,7 +1,8 @@
 "use server";
 
-import database, { MessageWithUser } from "@/clients/database";
+import database from "@/clients/database";
 import discord from "@/clients/discord-client";
+import { messageFromDiscordMessage, UnsavedMessage } from "@/dtos/message";
 import { revalidatePath } from "next/cache";
 
 export async function syncChannel({
@@ -16,7 +17,7 @@ export async function syncChannel({
   const authorUsers = await database.getServerUsers(serverId);
 
   const oldestMessage = await database.getOldestMessage(channelId);
-  let oldestMessageId = oldestMessage?.discord_id;
+  let oldestMessageId = oldestMessage?.discordId;
   let isSyncing = true;
 
   while (isSyncing) {
@@ -29,20 +30,20 @@ export async function syncChannel({
       break;
     }
 
-    const newMessagesWithUsers: MessageWithUser[] = newMessages.flatMap((m) => {
-      const author = authorUsers.find((row) => row.discord_id === m.author.id);
-      const content = m.content?.replace(/<@[0-9]+>/, "").trim();
+    const newMessagesWithUsers: UnsavedMessage[] = newMessages.flatMap(
+      (message) => {
+        const author = authorUsers.find(
+          (user) => user.discordId === message.author.id
+        );
+        const content = message.content?.replace(/<@[0-9]+>/, "").trim();
 
-      return author && content
-        ? [
-            {
-              ...m,
-              content: m.content?.replace(/<@[0-9]+>/, "").trim(),
-              author_user: author,
-            },
-          ]
-        : [];
-    });
+        return author && content
+          ? [messageFromDiscordMessage(message, author.id)]
+          : [];
+      }
+    );
+
+    console.log(newMessagesWithUsers);
 
     if (newMessagesWithUsers.length) {
       await database.upsertMessages(channelId, newMessagesWithUsers);

@@ -41,16 +41,16 @@ describe("/channels/[id].actions", async () => {
       const messages = [
         fakeDiscordMessage({
           author: {
-            id: users[0].discord_id,
-            username: users[0].discord_username,
-            global_name: users[0].discord_username,
+            id: users[0].discordId,
+            username: users[0].discordUsername,
+            global_name: users[0].discordUsername,
           },
         }),
         fakeDiscordMessage({
           author: {
-            id: users[1].discord_id,
-            username: users[1].discord_username,
-            global_name: users[1].discord_username,
+            id: users[1].discordId,
+            username: users[1].discordUsername,
+            global_name: users[1].discordUsername,
           },
         }),
       ];
@@ -73,10 +73,10 @@ describe("/channels/[id].actions", async () => {
 
       expect(database.upsertMessages).toHaveBeenCalledWith("1", [
         expect.objectContaining({
-          id: messages[0].id,
+          discordId: messages[0].id,
         }),
         expect.objectContaining({
-          id: messages[1].id,
+          discordId: messages[1].id,
         }),
       ]);
       expect(revalidatePath).toHaveBeenCalledWith("channels/1", "page");

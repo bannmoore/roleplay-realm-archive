@@ -37,7 +37,7 @@ export default async function RootLayout({
           <div className="flex-1">
             {user && (
               <div className="flex items-center justify-end gap-4">
-                <div>{user?.discord_username}</div>
+                <div>{user?.discordUsername}</div>
                 <form
                   action={async () => {
                     "use server";
