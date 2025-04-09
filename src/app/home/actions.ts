@@ -15,7 +15,8 @@ export async function refreshServers() {
       const server = await database.upsertServer({
         discordId: g.id,
         name: g.name,
-        iconHash: g.icon,
+        iconHash: g.icon ?? null,
+        active: true,
       });
 
       const members = await discord.getGuildMembers(server.discordId);

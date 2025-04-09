@@ -1,6 +1,6 @@
 "use server";
 
-import database from "@/clients/database";
+import database, { Message, Unsaved } from "@/clients/database";
 import { DiscordChannel } from "@/clients/discord-types";
 import discord from "@/clients/discord-client";
 import { revalidatePath } from "next/cache";
@@ -11,9 +11,11 @@ export async function getChannelOptions(serverDiscordId: string) {
 }
 
 export async function syncChannel(serverId: string, channel: DiscordChannel) {
-  const channelResult = await database.upsertChannel(serverId, {
+  const channelResult = await database.upsertChannel({
     discordId: channel.id,
     name: channel.name,
+    serverId,
+    active: true,
   });
 
   if (!channelResult) {
@@ -31,28 +33,26 @@ export async function syncChannel(serverId: string, channel: DiscordChannel) {
 
   const users = await database.getUsers(authors.map((author) => author.id));
 
-  const messagesWithUsers: {
-    discordId: string;
-    authorId: string;
-    content: string;
-    discordPublishedAt: Date;
-  }[] = messages.flatMap((message) => {
+  const messagesWithUsers: Unsaved<Message>[] = messages.flatMap((message) => {
     const author = users.find((row) => row.discordId === message.author.id);
     const content = message.content?.replace(/<@[0-9]+>/, "").trim();
 
     return author && content
       ? [
           {
+            channelId: channelResult.id,
             discordId: message.id,
             authorId: author.id,
             content,
             discordPublishedAt: new Date(message.timestamp),
+            isThread: !!message.thread,
+            threadId: null,
           },
         ]
       : [];
   });
 
-  await database.upsertMessages(channelResult.id, messagesWithUsers);
+  await database.upsertMessages(messagesWithUsers);
 
   revalidatePath(`servers/${serverId}`, "page");
 }

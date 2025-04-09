@@ -103,13 +103,13 @@ async function syncThread({
         );
         const content = message.content?.replace(/<@[0-9]+>/, "").trim();
 
-        return author && content
+        return author && (content || message.attachments?.length)
           ? [
               {
                 channelId: thread.channelId,
                 discordId: message.id,
                 authorId: author.id,
-                content,
+                content: content ?? "",
                 discordPublishedAt: new Date(message.timestamp),
                 isThread: !!message.thread,
                 threadId: thread.id,
