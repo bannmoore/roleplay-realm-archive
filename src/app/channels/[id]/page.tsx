@@ -2,7 +2,8 @@ import database from "@/clients/database";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SyncChannelButton from "./SyncChannelButton";
-
+import MessageCard from "./MessageCard";
+import ExpandableMessageCard from "./ExpandableMessageCard";
 export default async function Page({
   params,
 }: {
@@ -30,21 +31,15 @@ export default async function Page({
         <h2>Recent Posts</h2>
 
         <div className="mt-4 text-left">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className="mb-4 bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg"
-            >
-              <div className="flex mb-2">
-                <span className="flex-1">{message.authorId}</span>
-                <span>
-                  {message.discordPublishedAt.toDateString()}{" "}
-                  {message.discordPublishedAt.toLocaleTimeString()}
-                </span>
-              </div>
-              <p>{message.content}</p>
-            </div>
-          ))}
+          {messages.map((message) => {
+            if (message.isThread) {
+              return (
+                <ExpandableMessageCard key={message.id} message={message} />
+              );
+            }
+
+            return <MessageCard key={message.id} message={message} />;
+          })}
         </div>
       </div>
     </>

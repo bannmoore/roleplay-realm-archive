@@ -64,6 +64,19 @@ class DiscordClient {
     return this.getWithBotAuth(qs);
   }
 
+  async getThreadMessages(
+    parentMessageId: string,
+    { beforeId }: { beforeId?: string } = {}
+  ): Promise<DiscordMessage[]> {
+    let qs = `/channels/${parentMessageId}/messages?limit=100`;
+
+    if (beforeId) {
+      qs = `${qs}&before=${beforeId}`;
+    }
+
+    return this.getWithBotAuth(qs);
+  }
+
   private async getWithUserAuth(path: string) {
     if (!userToken) {
       console.error("Discord Client: Unauthenticated");

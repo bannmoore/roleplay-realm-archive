@@ -26,13 +26,6 @@ export type DiscordChannel = {
   guild_id: string;
   name: string;
   parent_id: string | null;
-  thread?: DiscordThread;
-};
-
-export type DiscordThread = {
-  id: string;
-  name: string;
-  parent_id: string | null;
 };
 
 // https://discord.com/developers/docs/resources/message#messages-resource
@@ -42,4 +35,5 @@ export type DiscordMessage = {
   author: DiscordUser;
   content?: string;
   timestamp: string;
+  thread?: DiscordChannel;
 };

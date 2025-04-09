@@ -31,6 +31,8 @@ export interface Messages {
   discordId: string;
   discordPublishedAt: Timestamp;
   id: Generated<Int8>;
+  isThread: Generated<boolean>;
+  threadId: Int8 | null;
   updatedAt: Generated<Timestamp>;
 }
 

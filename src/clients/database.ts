@@ -239,7 +239,9 @@ class DatabaseClient {
         db
           .selectFrom("messages")
           .selectAll("messages")
-          .where("channelId", "=", channelId)
+          .where((eb) =>
+            eb("channelId", "=", channelId).and("threadId", "is", null)
+          )
           .orderBy("discordPublishedAt desc")
           .limit(2)
       )
@@ -255,8 +257,37 @@ class DatabaseClient {
       .innerJoin("users", "messages.authorId", "users.id")
       .selectAll("messages")
       .select(["users.discordUsername"])
-      .where("channelId", "=", channelId)
+      .where((eb) =>
+        eb("channelId", "=", channelId).and("threadId", "is", null)
+      )
       .orderBy("discordPublishedAt asc")
+      .limit(1)
+      .executeTakeFirst();
+  }
+
+  async getThreads(channelId: string): Promise<Message[]> {
+    return this._db
+      .selectFrom("messages")
+      .selectAll()
+      .where((eb) => eb("channelId", "=", channelId).and("isThread", "=", true))
+      .execute();
+  }
+
+  async getThreadMessages(parentMessageId: string): Promise<Message[]> {
+    return this._db
+      .selectFrom("messages")
+      .selectAll()
+      .where("threadId", "=", parentMessageId)
+      .orderBy("discordPublishedAt", "asc")
+      .execute();
+  }
+
+  async getOldestThreadMessage(threadId: string): Promise<Message | undefined> {
+    return this._db
+      .selectFrom("messages")
+      .selectAll()
+      .where("threadId", "=", threadId)
+      .orderBy("discordPublishedAt", "asc")
       .limit(1)
       .executeTakeFirst();
   }
@@ -264,15 +295,7 @@ class DatabaseClient {
   async upsertMessages(messages: Unsaved<Message>[]): Promise<Message[]> {
     return this._db
       .insertInto("messages")
-      .values(
-        messages.map((message) => ({
-          discordId: message.discordId,
-          channelId: message.channelId,
-          authorId: message.authorId,
-          content: message.content,
-          discordPublishedAt: message.discordPublishedAt,
-        }))
-      )
+      .values(messages)
       .returningAll()
       .onConflict((oc) =>
         oc
