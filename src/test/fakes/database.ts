@@ -28,5 +28,7 @@ export function fakeMessage() {
     channelId: id(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
+    isThread: false,
+    threadId: null,
   });
 }
