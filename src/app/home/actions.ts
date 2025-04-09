@@ -2,7 +2,6 @@
 
 import database from "@/clients/database";
 import discord from "@/clients/discord-client";
-import { userFromDiscordUser } from "@/dtos/user";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {
@@ -21,7 +20,10 @@ export async function refreshServers() {
 
       const members = await discord.getGuildMembers(server.discordId);
       const users = await database.upsertUsers(
-        members.map(userFromDiscordUser)
+        members.map((member) => ({
+          discordId: member.id,
+          discordUsername: member.username,
+        }))
       );
       await database.upsertServersUsers(server.id, users);
 

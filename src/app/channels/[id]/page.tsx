@@ -9,7 +9,7 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const channel = await database.getChannelWithMetadata(id);
+  const channel = await database.getChannel(id);
 
   if (!channel) {
     return notFound();
@@ -27,12 +27,6 @@ export default async function Page({
       <div className="text-left">
         <SyncChannelButton channel={channel} />
 
-        <div className="mb-4">
-          <div>Total messages: {channel.totalMessages}</div>
-          <div>First message: {channel.firstMessageAt?.toDateString()}</div>
-          <div>Last message: {channel.lastMessageAt?.toDateString()}</div>
-        </div>
-
         <h2>Recent Posts</h2>
 
         <div className="mt-4 text-left">
@@ -42,7 +36,7 @@ export default async function Page({
               className="mb-4 bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg"
             >
               <div className="flex mb-2">
-                <span className="flex-1">{message.authorUsername}</span>
+                <span className="flex-1">{message.authorId}</span>
                 <span>
                   {message.discordPublishedAt.toDateString()}{" "}
                   {message.discordPublishedAt.toLocaleTimeString()}

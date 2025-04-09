@@ -2,7 +2,6 @@
 
 import database from "@/clients/database";
 import discord from "@/clients/discord-client";
-import { messageFromDiscordMessage, UnsavedMessage } from "@/dtos/message";
 import { revalidatePath } from "next/cache";
 
 export async function syncChannel({
@@ -30,18 +29,28 @@ export async function syncChannel({
       break;
     }
 
-    const newMessagesWithUsers: UnsavedMessage[] = newMessages.flatMap(
-      (message) => {
-        const author = authorUsers.find(
-          (user) => user.discordId === message.author.id
-        );
-        const content = message.content?.replace(/<@[0-9]+>/, "").trim();
+    const newMessagesWithUsers: {
+      discordId: string;
+      authorId: string;
+      content: string;
+      discordPublishedAt: Date;
+    }[] = newMessages.flatMap((message) => {
+      const author = authorUsers.find(
+        (user) => user.discordId === message.author.id
+      );
+      const content = message.content?.replace(/<@[0-9]+>/, "").trim();
 
-        return author && content
-          ? [messageFromDiscordMessage(message, author.id)]
-          : [];
-      }
-    );
+      return author && content
+        ? [
+            {
+              discordId: message.id,
+              authorId: author.id,
+              content,
+              discordPublishedAt: new Date(message.timestamp),
+            },
+          ]
+        : [];
+    });
 
     console.log(newMessagesWithUsers);
 

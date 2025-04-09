@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { syncChannel } from "./actions";
-import { Channel } from "@/dtos/channel";
+import { Channel } from "@/clients/database";
 
 export default function SyncChannelButton({ channel }: { channel: Channel }) {
   const [isSyncing, setIsSyncing] = useState(false);
