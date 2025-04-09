@@ -9,6 +9,8 @@ export type Server = Selectable<Servers>;
 export type Channel = Selectable<Channels>;
 export type Message = Selectable<Messages>;
 
+export type Unsaved<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
+
 class DatabaseClient {
   private _db: Kysely<DB>;
 
@@ -70,24 +72,17 @@ class DatabaseClient {
       .execute();
   }
 
-  async upsertUser({
-    discordId,
-    discordUsername,
-  }: {
-    discordId: string;
-    discordUsername: string;
-  }): Promise<User> {
+  async upsertUser(user: Unsaved<User>): Promise<User> {
     return this._db
       .with("inserted", (db) =>
         db
           .insertInto("users")
           .columns(["discordId", "discordUsername"])
-          .values({
-            discordId,
-            discordUsername,
-          })
+          .values(user)
           .onConflict((oc) =>
-            oc.column("discordId").doUpdateSet({ discordUsername })
+            oc
+              .column("discordId")
+              .doUpdateSet({ discordUsername: user.discordUsername })
           )
           .returningAll()
       )
@@ -97,17 +92,12 @@ class DatabaseClient {
         this._db
           .selectFrom("users")
           .selectAll()
-          .where("discordId", "=", discordId)
+          .where("discordId", "=", user.discordId)
       )
       .executeTakeFirstOrThrow();
   }
 
-  async upsertUsers(
-    users: {
-      discordId: string;
-      discordUsername: string;
-    }[]
-  ): Promise<User[]> {
+  async upsertUsers(users: Unsaved<User>[]): Promise<User[]> {
     const ids = users.map((user) => user.discordId);
 
     return this._db
@@ -162,30 +152,17 @@ class DatabaseClient {
       .execute();
   }
 
-  async upsertServer({
-    discordId,
-    name,
-    iconHash,
-  }: {
-    discordId: string;
-    name: string;
-    iconHash?: string;
-  }): Promise<Server> {
+  async upsertServer(server: Unsaved<Server>): Promise<Server> {
     return this._db
       .with("inserted", (db) =>
         db
           .insertInto("servers")
           .columns(["discordId", "name", "iconHash", "active"])
-          .values({
-            discordId,
-            name,
-            iconHash,
-            active: true,
-          })
+          .values(server)
           .onConflict((oc) =>
             oc.column("discordId").doUpdateSet({
-              name,
-              iconHash,
+              name: server.name,
+              iconHash: server.iconHash,
               active: true,
             })
           )
@@ -197,7 +174,7 @@ class DatabaseClient {
         this._db
           .selectFrom("servers")
           .selectAll()
-          .where("discordId", "=", discordId)
+          .where("discordId", "=", server.discordId)
       )
       .executeTakeFirstOrThrow();
   }
@@ -239,21 +216,13 @@ class DatabaseClient {
 
   async upsertChannel(
     serverId: string,
-    channel: {
-      discordId: string;
-      name: string;
-    }
+    channel: Unsaved<Channel>
   ): Promise<Channel | undefined> {
     return this._db
       .with("inserted", (db) =>
         db
           .insertInto("channels")
-          .values({
-            discordId: channel.discordId,
-            serverId: serverId,
-            name: channel.name,
-            active: true,
-          })
+          .values(channel)
           .onConflict((oc) => oc.column("discordId").doNothing())
           .returningAll()
       )
@@ -292,21 +261,13 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
-  async upsertMessages(
-    channelId: string,
-    messages: {
-      discordId: string;
-      authorId: string;
-      content: string;
-      discordPublishedAt: Date;
-    }[]
-  ): Promise<Message[]> {
+  async upsertMessages(messages: Unsaved<Message>[]): Promise<Message[]> {
     return this._db
       .insertInto("messages")
       .values(
         messages.map((message) => ({
           discordId: message.discordId,
-          channelId: channelId,
+          channelId: message.channelId,
           authorId: message.authorId,
           content: message.content,
           discordPublishedAt: message.discordPublishedAt,
