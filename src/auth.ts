@@ -3,6 +3,9 @@ import Discord from "next-auth/providers/discord";
 import { config } from "./config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // trustHost is equired for Docker deployment
+  // Ref: https://authjs.dev/getting-started/deployment#docker
+  trustHost: true,
   providers: [
     Discord({
       clientId: config.discordClientId,
