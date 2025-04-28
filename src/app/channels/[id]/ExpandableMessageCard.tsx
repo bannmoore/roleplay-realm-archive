@@ -4,7 +4,7 @@ import { MessageWithDisplayData } from "@/clients/database";
 import { getThreadMessages } from "./actions";
 import { useState } from "react";
 import Image from "next/image";
-
+import MessageContent from "./MessageContent";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -58,7 +58,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
             />
           </div>
         ))}
-        <p>{message.content}</p>
+        <MessageContent message={message} />
         {message.isThread && (
           <div className="mt-2 text-sm text-gray-400">
             {isLoading
@@ -95,7 +95,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
                   />
                 </div>
               ))}
-              <p className="text-sm">{threadMessage.content}</p>
+              <MessageContent message={threadMessage} />
             </div>
           ))}
         </div>

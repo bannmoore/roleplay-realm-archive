@@ -1,6 +1,6 @@
 import { MessageWithDisplayData } from "@/clients/database";
 import Image from "next/image";
-
+import MessageContent from "./MessageContent";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -26,7 +26,7 @@ export default function MessageCard({ message }: MessageCardProps) {
           />
         </div>
       ))}
-      <p>{message.content}</p>
+      <MessageContent message={message} />
     </div>
   );
 }

@@ -18,7 +18,8 @@
     "pg": "^8.13.1",
     "pg-connection-string": "^2.7.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "showdown": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -29,6 +30,7 @@
     "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/showdown": "^2.0.6",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
