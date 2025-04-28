@@ -24,7 +24,8 @@ export type Channel = Selectable<Channels>;
 export type Message = Selectable<Messages>;
 export type MessageAttachment = Selectable<MessagesAttachments>;
 
-export type MessageWithAttachments = Message & {
+export type MessageWithDisplayData = Message & {
+  authorUsername: string;
   attachments: MessageAttachment[];
 };
 
@@ -262,12 +263,14 @@ class DatabaseClient {
 
   async getRecentMessages(
     channelId: string
-  ): Promise<MessageWithAttachments[]> {
+  ): Promise<MessageWithDisplayData[]> {
     return this._db
       .with("reversed", (db) =>
         db
           .selectFrom("messages")
           .selectAll("messages")
+          .innerJoin("users", "messages.authorId", "users.id")
+          .select(["users.discordUsername as authorUsername"])
           .select(({ ref }) => [
             this._messageAttachments(ref("messages.id")).as("attachments"),
           ])
@@ -307,10 +310,12 @@ class DatabaseClient {
 
   async getThreadMessages(
     parentMessageId: string
-  ): Promise<MessageWithAttachments[]> {
+  ): Promise<MessageWithDisplayData[]> {
     return this._db
       .selectFrom("messages")
       .selectAll("messages")
+      .innerJoin("users", "messages.authorId", "users.id")
+      .select(["users.discordUsername as authorUsername"])
       .select(({ ref }) => [
         this._messageAttachments(ref("messages.id")).as("attachments"),
       ])

@@ -1,15 +1,15 @@
-import { MessageWithAttachments } from "@/clients/database";
+import { MessageWithDisplayData } from "@/clients/database";
 import Image from "next/image";
 
 interface MessageCardProps {
-  message: MessageWithAttachments;
+  message: MessageWithDisplayData;
 }
 
 export default function MessageCard({ message }: MessageCardProps) {
   return (
     <div className="mb-4 bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg">
       <div className="flex mb-2">
-        <span className="flex-1">{message.authorId}</span>
+        <span className="flex-1">{message.authorUsername}</span>
         <span>
           {message.discordPublishedAt.toDateString()}{" "}
           {message.discordPublishedAt.toLocaleTimeString()}

@@ -1,18 +1,18 @@
 "use client";
 
-import { MessageWithAttachments } from "@/clients/database";
+import { MessageWithDisplayData } from "@/clients/database";
 import { getThreadMessages } from "./actions";
 import { useState } from "react";
 import Image from "next/image";
 
 interface MessageCardProps {
-  message: MessageWithAttachments;
+  message: MessageWithDisplayData;
 }
 
 export default function ExpandableMessageCard({ message }: MessageCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [threadMessages, setThreadMessages] = useState<
-    MessageWithAttachments[]
+    MessageWithDisplayData[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +41,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
         onClick={handleClick}
       >
         <div className="flex mb-2">
-          <span className="flex-1">{message.authorId}</span>
+          <span className="flex-1">{message.authorUsername}</span>
           <span>
             {message.discordPublishedAt.toDateString()}{" "}
             {message.discordPublishedAt.toLocaleTimeString()}
@@ -78,7 +78,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
               className="mb-2 bg-darkpurple-800 p-3 border border-darkpurple-600 shadow-sm rounded-lg"
             >
               <div className="flex mb-1 text-sm">
-                <span className="flex-1">{threadMessage.authorId}</span>
+                <span className="flex-1">{threadMessage.authorUsername}</span>
                 <span className="text-xs">
                   {threadMessage.discordPublishedAt.toDateString()}{" "}
                   {threadMessage.discordPublishedAt.toLocaleTimeString()}

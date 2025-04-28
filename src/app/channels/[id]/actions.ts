@@ -3,7 +3,7 @@
 import database, {
   Message,
   MessageAttachment,
-  MessageWithAttachments,
+  MessageWithDisplayData,
   Unsaved,
   User,
 } from "@/clients/database";
@@ -187,6 +187,6 @@ function sleep(ms: number) {
 
 export async function getThreadMessages(
   parentMessageId: string
-): Promise<MessageWithAttachments[]> {
+): Promise<MessageWithDisplayData[]> {
   return database.getThreadMessages(parentMessageId);
 }
