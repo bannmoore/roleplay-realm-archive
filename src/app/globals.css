@@ -13,8 +13,19 @@
     @apply bg-darkpurple-700 text-white font-bold py-2 px-4 rounded;
   }
 
+  a.link {
+    color: #BFCDE0;
+    /* Columbia Blue */
+    text-decoration: underline;
+  }
+
+  a.link:hover {
+    color: #9FB3D1;
+    /* Lighter shade of blue for hover state */
+  }
+
   h1 {
-    @apply text-xl font-bold;
+    @apply text-2xl font-bold;
   }
 
   h2 {
