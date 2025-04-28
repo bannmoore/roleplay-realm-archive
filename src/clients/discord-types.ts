@@ -36,4 +36,16 @@ export type DiscordMessage = {
   content?: string;
   timestamp: string;
   thread?: DiscordChannel;
+  attachments: DiscordAttachment[];
+};
+
+// https://discord.com/developers/docs/resources/message#attachment-object
+export type DiscordAttachment = {
+  id: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  url: string;
+  width?: number;
+  height?: number;
 };

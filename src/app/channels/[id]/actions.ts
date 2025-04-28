@@ -1,7 +1,14 @@
 "use server";
 
-import database, { Message, Unsaved, User } from "@/clients/database";
+import database, {
+  Message,
+  MessageAttachment,
+  MessageWithAttachments,
+  Unsaved,
+  User,
+} from "@/clients/database";
 import discord from "@/clients/discord-client";
+import { DiscordMessage } from "@/clients/discord-types";
 import { revalidatePath } from "next/cache";
 
 export async function syncChannel({
@@ -53,7 +60,12 @@ export async function syncChannel({
     );
 
     if (newUnsavedMessages.length) {
-      await database.upsertMessages(newUnsavedMessages);
+      const createdMessages = await database.upsertMessages(newUnsavedMessages);
+
+      await syncMessageAttachments({
+        discordMessages: newDiscordMessages,
+        dbMessages: createdMessages,
+      });
     }
 
     oldestMessageId = newDiscordMessages[newDiscordMessages.length - 1].id;
@@ -119,7 +131,14 @@ async function syncThread({
       });
 
     if (newUnsavedThreadMessages.length) {
-      await database.upsertMessages(newUnsavedThreadMessages);
+      const createdThreadMessages = await database.upsertMessages(
+        newUnsavedThreadMessages
+      );
+
+      await syncMessageAttachments({
+        discordMessages: newDiscordThreadMessages,
+        dbMessages: createdThreadMessages,
+      });
     }
 
     oldestThreadMessageId =
@@ -129,12 +148,41 @@ async function syncThread({
   }
 }
 
+async function syncMessageAttachments({
+  discordMessages,
+  dbMessages,
+}: {
+  discordMessages: DiscordMessage[];
+  dbMessages: Message[];
+}) {
+  let attachments: Unsaved<MessageAttachment>[] = [];
+
+  discordMessages.forEach((discordMessage) => {
+    const dbMessage = dbMessages.find((m) => m.discordId === discordMessage.id);
+
+    if (dbMessage) {
+      attachments = attachments.concat(
+        discordMessage.attachments.map((attachment) => ({
+          messageId: dbMessage.id,
+          discordSourceUri: attachment.url,
+          sourceUri: null,
+          width: attachment.width ?? null,
+          height: attachment.height ?? null,
+        }))
+      );
+    }
+  });
+
+  console.log("upsertMessagesAttachments", { attachments });
+  await database.upsertMessagesAttachments(attachments);
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function getThreadMessages(
   parentMessageId: string
-): Promise<Message[]> {
+): Promise<MessageWithAttachments[]> {
   return database.getThreadMessages(parentMessageId);
 }

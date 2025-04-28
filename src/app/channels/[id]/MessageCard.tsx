@@ -1,7 +1,8 @@
-import { Message } from "@/clients/database";
+import { MessageWithAttachments } from "@/clients/database";
+import Image from "next/image";
 
 interface MessageCardProps {
-  message: Message;
+  message: MessageWithAttachments;
 }
 
 export default function MessageCard({ message }: MessageCardProps) {
@@ -14,6 +15,17 @@ export default function MessageCard({ message }: MessageCardProps) {
           {message.discordPublishedAt.toLocaleTimeString()}
         </span>
       </div>
+      {message.attachments.map((attachment) => (
+        <div className="p-4" key={attachment.id}>
+          <Image
+            src={attachment.discordSourceUri}
+            alt="Attachment"
+            width={attachment.width ?? 500}
+            height={attachment.height ?? 500}
+            className="m-auto"
+          />
+        </div>
+      ))}
       <p>{message.content}</p>
     </div>
   );

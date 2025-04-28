@@ -1,13 +1,32 @@
-import { CamelCasePlugin, Kysely, PostgresDialect, Selectable } from "kysely";
-import { Channels, DB, Messages, Servers, Users } from "./db";
+import {
+  CamelCasePlugin,
+  Expression,
+  Kysely,
+  PostgresDialect,
+  Selectable,
+} from "kysely";
+import {
+  Channels,
+  DB,
+  Messages,
+  MessagesAttachments,
+  Servers,
+  Users,
+} from "./db";
 import { Pool } from "pg";
 import { parse } from "pg-connection-string";
 import { config } from "@/config";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 
 export type User = Selectable<Users>;
 export type Server = Selectable<Servers>;
 export type Channel = Selectable<Channels>;
 export type Message = Selectable<Messages>;
+export type MessageAttachment = Selectable<MessagesAttachments>;
+
+export type MessageWithAttachments = Message & {
+  attachments: MessageAttachment[];
+};
 
 export type Unsaved<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
 
@@ -230,12 +249,17 @@ class DatabaseClient {
       .executeTakeFirstOrThrow();
   }
 
-  async getRecentMessages(channelId: string): Promise<Message[]> {
+  async getRecentMessages(
+    channelId: string
+  ): Promise<MessageWithAttachments[]> {
     return this._db
       .with("reversed", (db) =>
         db
           .selectFrom("messages")
           .selectAll("messages")
+          .select(({ ref }) => [
+            this._messageAttachments(ref("messages.id")).as("attachments"),
+          ])
           .where((eb) =>
             eb("channelId", "=", channelId).and("threadId", "is", null)
           )
@@ -265,15 +289,20 @@ class DatabaseClient {
   async getThreads(channelId: string): Promise<Message[]> {
     return this._db
       .selectFrom("messages")
-      .selectAll()
+      .selectAll("messages")
       .where((eb) => eb("channelId", "=", channelId).and("isThread", "=", true))
       .execute();
   }
 
-  async getThreadMessages(parentMessageId: string): Promise<Message[]> {
+  async getThreadMessages(
+    parentMessageId: string
+  ): Promise<MessageWithAttachments[]> {
     return this._db
       .selectFrom("messages")
-      .selectAll()
+      .selectAll("messages")
+      .select(({ ref }) => [
+        this._messageAttachments(ref("messages.id")).as("attachments"),
+      ])
       .where("threadId", "=", parentMessageId)
       .orderBy("discordPublishedAt", "asc")
       .execute();
@@ -290,6 +319,10 @@ class DatabaseClient {
   }
 
   async upsertMessages(messages: Unsaved<Message>[]): Promise<Message[]> {
+    if (!messages.length) {
+      return [];
+    }
+
     return this._db
       .insertInto("messages")
       .values(messages)
@@ -300,6 +333,29 @@ class DatabaseClient {
           .doUpdateSet({ content: (eb) => eb.ref("excluded.content") })
       )
       .execute();
+  }
+
+  async upsertMessagesAttachments(
+    messagesAttachments: Unsaved<MessageAttachment>[]
+  ): Promise<MessageAttachment[]> {
+    if (!messagesAttachments.length) {
+      return [];
+    }
+
+    return this._db
+      .insertInto("messagesAttachments")
+      .values(messagesAttachments)
+      .returningAll()
+      .execute();
+  }
+
+  _messageAttachments(messageId: Expression<string>) {
+    return jsonArrayFrom(
+      this._db
+        .selectFrom("messagesAttachments")
+        .selectAll("messagesAttachments")
+        .where("messagesAttachments.messageId", "=", messageId)
+    );
   }
 }
 

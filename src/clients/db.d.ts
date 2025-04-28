@@ -36,6 +36,16 @@ export interface Messages {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface MessagesAttachments {
+  createdAt: Generated<Timestamp>;
+  discordSourceUri: string;
+  height: number | null;
+  id: Generated<Int8>;
+  messageId: Int8;
+  sourceUri: string | null;
+  width: number | null;
+}
+
 export interface Servers {
   active: Generated<boolean>;
   createdAt: Generated<Timestamp>;
@@ -69,6 +79,7 @@ export interface Users {
 export interface DB {
   channels: Channels;
   messages: Messages;
+  messagesAttachments: MessagesAttachments;
   servers: Servers;
   serversUsers: ServersUsers;
   sessions: Sessions;

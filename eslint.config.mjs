@@ -23,10 +23,24 @@ const eslintConfig = [
         "error",
         { devDependencies: false },
       ],
+      "@typescript-eslint/no-unused-vars": [
+        "error", // or "error"
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {
-    files: ["**/src/test/**", "**/*.test.ts", "*.mjs"],
+    files: [
+      "**/src/test/**",
+      "**/*.test.ts",
+      "*.mjs",
+      "**/cypress/**",
+      "cypress.config.ts",
+    ],
     rules: {
       "no-restricted-imports": "off",
       "import/no-extraneous-dependencies": ["error", { devDependencies: true }],

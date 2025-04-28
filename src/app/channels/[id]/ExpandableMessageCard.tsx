@@ -1,16 +1,19 @@
 "use client";
 
-import { Message } from "@/clients/database";
+import { MessageWithAttachments } from "@/clients/database";
 import { getThreadMessages } from "./actions";
 import { useState } from "react";
+import Image from "next/image";
 
 interface MessageCardProps {
-  message: Message;
+  message: MessageWithAttachments;
 }
 
 export default function ExpandableMessageCard({ message }: MessageCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [threadMessages, setThreadMessages] = useState<Message[]>([]);
+  const [threadMessages, setThreadMessages] = useState<
+    MessageWithAttachments[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
@@ -44,6 +47,17 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
             {message.discordPublishedAt.toLocaleTimeString()}
           </span>
         </div>
+        {message.attachments.map((attachment) => (
+          <div className="p-4" key={attachment.id}>
+            <Image
+              src={attachment.discordSourceUri}
+              alt="Attachment"
+              width={attachment.width ?? 500}
+              height={attachment.height ?? 500}
+              className="m-auto"
+            />
+          </div>
+        ))}
         <p>{message.content}</p>
         {message.isThread && (
           <div className="mt-2 text-sm text-gray-400">
@@ -70,6 +84,17 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
                   {threadMessage.discordPublishedAt.toLocaleTimeString()}
                 </span>
               </div>
+              {threadMessage.attachments.map((attachment) => (
+                <div className="p-4" key={attachment.id}>
+                  <Image
+                    src={attachment.discordSourceUri}
+                    alt="Attachment"
+                    width={attachment.width ?? 500}
+                    height={attachment.height ?? 500}
+                    className="m-auto"
+                  />
+                </div>
+              ))}
               <p className="text-sm">{threadMessage.content}</p>
             </div>
           ))}
