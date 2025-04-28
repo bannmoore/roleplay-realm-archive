@@ -1,58 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { syncChannel } from "./actions";
 import { Channel } from "@/clients/database";
+import { AlertContext } from "@/app/components/AlertContext";
 
 export default function SyncChannelButton({ channel }: { channel: Channel }) {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const { setAlert } = useContext(AlertContext);
 
   return (
-    <>
-      {error && (
-        <div
-          className="bg-error-900 bg-opacity-75 border border-error-700 text-white px-4 py-3 rounded relative"
-          role="alert"
-        >
-          Error: {error}
-        </div>
-      )}
-      {success && (
-        <div
-          className="bg-success-500 bg-opacity-50 border border-success-400 text-white px-4 py-3 rounded relative"
-          role="alert"
-        >
-          Servers updated successfully.
-        </div>
-      )}
-      {isSyncing && <div>Syncing... this could take a while.</div>}
-      <button
-        type="button"
-        onClick={async () => {
-          setSuccess(false);
-          setError("");
-          setIsSyncing(true);
+    <button
+      type="button"
+      disabled={isSyncing}
+      onClick={async () => {
+        setAlert(null);
+        setIsSyncing(true);
 
-          await syncChannel({
-            channelId: channel.id,
-            channelDiscordId: channel.discordId,
-            serverId: channel.serverId,
+        await syncChannel({
+          channelId: channel.id,
+          channelDiscordId: channel.discordId,
+          serverId: channel.serverId,
+        })
+          .then(() =>
+            setAlert({ message: "Channel synced", variant: "success" })
+          )
+          .catch((err) => {
+            // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+            let message = "Unknown Error";
+            if (err instanceof Error) message = err.message;
+
+            setAlert({ message, variant: "error" });
           })
-            .then(() => setSuccess(true))
-            .catch((err) => {
-              // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
-              let message = "Unknown Error";
-              if (err instanceof Error) message = err.message;
-
-              setError(message);
-            })
-            .finally(() => setIsSyncing(false));
-        }}
-      >
-        Sync Channel
-      </button>
-    </>
+          .finally(() => setIsSyncing(false));
+      }}
+    >
+      {isSyncing ? "Syncing..." : "Sync"}
+    </button>
   );
 }

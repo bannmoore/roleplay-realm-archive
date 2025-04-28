@@ -18,6 +18,7 @@ export interface Channels {
   createdAt: Generated<Timestamp>;
   discordId: string;
   id: Generated<Int8>;
+  lastSyncedAt: Timestamp | null;
   name: string;
   serverId: Int8;
   updatedAt: Generated<Timestamp>;

@@ -249,6 +249,17 @@ class DatabaseClient {
       .executeTakeFirstOrThrow();
   }
 
+  async updateChannel(
+    channelId: string,
+    update: Partial<Unsaved<Channel>>
+  ): Promise<void> {
+    await this._db
+      .updateTable("channels")
+      .set(update)
+      .where("id", "=", channelId)
+      .execute();
+  }
+
   async getRecentMessages(
     channelId: string
   ): Promise<MessageWithAttachments[]> {

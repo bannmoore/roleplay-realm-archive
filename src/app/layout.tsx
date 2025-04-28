@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { signIn, signOut } from "@/auth";
 import { checkAuthenticated } from "@/util";
+import { AlertProvider } from "./components/AlertContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +64,9 @@ export default async function RootLayout({
           </div>
         </header>
         <main className="container m-auto p-4 text-center">
-          {user ? children : <div>Please sign in.</div>}
+          <AlertProvider>
+            {user ? children : <div>Please sign in.</div>}
+          </AlertProvider>
         </main>
       </body>
     </html>

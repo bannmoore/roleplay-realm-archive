@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import SyncChannelButton from "./SyncChannelButton";
 import MessageCard from "./MessageCard";
 import ExpandableMessageCard from "./ExpandableMessageCard";
+import Alert from "@/app/components/Alert";
 export default async function Page({
   params,
 }: {
@@ -25,10 +26,23 @@ export default async function Page({
         <Link href={`/servers/${channel.serverId}`}>Back</Link>
       </div>
 
-      <div className="text-left">
-        <SyncChannelButton channel={channel} />
+      <div className="my-4">
+        <Alert />
+      </div>
 
-        <h2>Recent Posts</h2>
+      <div className="text-left">
+        <div className="flex justify-between my-4">
+          <h2>Recent Posts</h2>
+          <span>
+            Last synced:{" "}
+            {channel.lastSyncedAt
+              ? channel.lastSyncedAt.toLocaleString()
+              : "Never"}
+            <div className="inline-block ml-4">
+              <SyncChannelButton channel={channel} />
+            </div>
+          </span>
+        </div>
 
         <div className="mt-4 text-left">
           {messages.map((message) => {

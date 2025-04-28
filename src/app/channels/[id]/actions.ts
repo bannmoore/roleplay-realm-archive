@@ -81,6 +81,10 @@ export async function syncChannel({
     });
   });
 
+  await database.updateChannel(channelId, {
+    lastSyncedAt: new Date(),
+  });
+
   revalidatePath(`channels/${channelId}`, "page");
 }
 
