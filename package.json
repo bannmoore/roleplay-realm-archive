@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "cy:open": "cypress open",
     "codegen": "kysely-codegen --out-file ./src/clients/db.d.ts"
   },
   "dependencies": {
@@ -32,6 +33,8 @@
     "@types/react-dom": "^19",
     "@types/showdown": "^2.0.6",
     "@vitejs/plugin-react": "^4.3.4",
+    "cypress": "^14.3.2",
+    "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "jsdom": "^26.0.0",
