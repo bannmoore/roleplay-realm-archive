@@ -177,7 +177,6 @@ async function syncMessageAttachments({
     }
   });
 
-  console.log("upsertMessagesAttachments", { attachments });
   await database.upsertMessagesAttachments(attachments);
 }
 
