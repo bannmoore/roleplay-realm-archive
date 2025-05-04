@@ -20,7 +20,7 @@ export async function checkAuthenticated() {
   const session = await auth();
 
   if (session?.user?.id) {
-    user = await database.getCurrentUser(session?.user?.id);
+    user = await database.getUser(session?.user?.id);
   }
 
   return user;

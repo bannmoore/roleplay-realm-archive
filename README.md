@@ -2,7 +2,9 @@
 
 ## Integrations
 
-- [Next-Auth](https://github.com/nextauthjs/cli) (https://next-auth.js.org/getting-started/example#deploying-to-production)
+- [Auth.js](https://authjs.dev/)
 
-https://authjs.dev/getting-started/migrating-to-v5
+## First-time Setup
+
+Run `npx auth`
 

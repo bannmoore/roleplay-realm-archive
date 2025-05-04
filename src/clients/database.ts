@@ -67,7 +67,7 @@ class DatabaseClient {
     });
   }
 
-  async getCurrentUser(discordId: string): Promise<User | undefined> {
+  async getUser(discordId: string): Promise<User | undefined> {
     return this._db
       .selectFrom("users")
       .where("discordId", "=", discordId)
