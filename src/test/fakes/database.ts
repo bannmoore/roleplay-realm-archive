@@ -1,34 +1,48 @@
 import { faker } from "@faker-js/faker";
 import { generateFake } from "../fakes";
-import { snowflake } from "./discord";
-import { Message } from "@/clients/database";
+import { fakeSnowflake } from "./discord";
+import { Channel, Message } from "@/clients/database";
 import { User } from "@/clients/database";
 
-export function id() {
+function fakeId() {
   return faker.number.int().toString();
 }
 
 export function fakeUser() {
   return generateFake<User>("User", {
-    discordId: snowflake(),
-    id: id(),
+    discordId: fakeSnowflake(),
+    id: fakeId(),
     discordUsername: faker.internet.username(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   });
 }
 
-export function fakeMessage() {
+export function fakeMessage(data: Partial<Message>) {
   return generateFake<Message>("Message", {
-    id: id(),
-    discordId: snowflake(),
+    id: fakeId(),
+    discordId: fakeSnowflake(),
     discordPublishedAt: faker.date.past(),
     content: faker.lorem.paragraphs(2),
-    authorId: id(),
-    channelId: id(),
+    authorId: fakeId(),
+    channelId: fakeId(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
     isThread: false,
     threadId: null,
+    ...data,
+  });
+}
+
+export function fakeChannel() {
+  return generateFake<Channel>("Channel", {
+    id: fakeId(),
+    discordId: fakeSnowflake(),
+    serverId: fakeId(),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.past(),
+    active: true,
+    lastSyncedAt: null,
+    name: faker.lorem.word(),
   });
 }
