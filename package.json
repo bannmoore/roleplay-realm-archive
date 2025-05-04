@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "type-check": "tsc --noEmit",
     "cy:open": "cypress open",
     "codegen": "kysely-codegen --out-file ./src/clients/db.d.ts"
   },
