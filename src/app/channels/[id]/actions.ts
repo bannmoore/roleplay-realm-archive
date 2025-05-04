@@ -7,8 +7,8 @@ import database, {
   Unsaved,
   User,
 } from "@/clients/database";
-import discord from "@/clients/discord-client";
-import { DiscordMessage } from "@/clients/discord-types";
+import discord from "@/clients/discord";
+import type { DiscordMessage } from "@/clients/discord";
 import { revalidatePath } from "next/cache";
 
 export async function syncChannel({

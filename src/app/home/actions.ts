@@ -1,7 +1,7 @@
 "use server";
 
 import database from "@/clients/database";
-import discord from "@/clients/discord-client";
+import discord from "@/clients/discord";
 import { revalidatePath } from "next/cache";
 
 export async function refreshServers() {

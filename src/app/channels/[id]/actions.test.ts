@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { when } from "vitest-when";
 import { beforeEach } from "node:test";
 import database from "@/clients/database";
-import discord from "@/clients/discord-client";
+import discord from "@/clients/discord";
 import { syncChannel } from "./actions";
 import { revalidatePath } from "next/cache";
 import { fakeArray } from "@/test/fakes";

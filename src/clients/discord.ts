@@ -1,11 +1,4 @@
 import { config } from "@/config";
-import {
-  DiscordChannel,
-  DiscordGuild,
-  DiscordGuildMember,
-  DiscordMessage,
-  DiscordUser,
-} from "./discord-types";
 
 let userToken: string | null = null;
 
@@ -120,3 +113,55 @@ const discord = Object.freeze(
 );
 
 export default discord;
+
+// https://discord.com/developers/docs/resources/guild#guild-member-object
+export type DiscordGuildMember = {
+  user: DiscordUser;
+};
+
+// https://discord.com/developers/docs/resources/user#users-resource
+export type DiscordUser = {
+  id: string;
+  // TODO:: hash, https://discord.com/developers/docs/reference#image-formatting
+  username: string;
+  avatar?: string;
+  global_name: string;
+  bot?: boolean;
+};
+
+// https://discord.com/developers/docs/resources/guild#guild-resource
+export type DiscordGuild = {
+  id: string;
+  name: string;
+  icon?: string;
+};
+
+// https://discord.com/developers/docs/resources/channel#channels-resource
+export type DiscordChannel = {
+  id: string;
+  guild_id: string;
+  name: string;
+  parent_id: string | null;
+};
+
+// https://discord.com/developers/docs/resources/message#messages-resource
+export type DiscordMessage = {
+  id: string;
+  channel_id: string;
+  author: DiscordUser;
+  content?: string;
+  timestamp: string;
+  thread?: DiscordChannel;
+  attachments: DiscordAttachment[];
+};
+
+// https://discord.com/developers/docs/resources/message#attachment-object
+export type DiscordAttachment = {
+  id: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  url: string;
+  width?: number;
+  height?: number;
+};

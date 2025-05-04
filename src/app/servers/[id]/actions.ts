@@ -1,8 +1,8 @@
 "use server";
 
 import database, { Message, Unsaved } from "@/clients/database";
-import { DiscordChannel } from "@/clients/discord-types";
-import discord from "@/clients/discord-client";
+import type { DiscordChannel } from "@/clients/discord";
+import discord from "@/clients/discord";
 import { revalidatePath } from "next/cache";
 
 export async function getChannelOptions(serverDiscordId: string) {

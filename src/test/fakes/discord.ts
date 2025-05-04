@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 
-import { DiscordMessage, DiscordUser } from "@/clients/discord-types";
+import { DiscordMessage, DiscordUser } from "@/clients/discord";
 import { generateFake } from "../fakes";
 
 export function snowflake() {
