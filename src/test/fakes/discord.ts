@@ -24,6 +24,7 @@ export function fakeDiscordMessage(obj: Partial<DiscordMessage>) {
     author: fakeDiscordUser(),
     content: faker.lorem.paragraphs(2),
     timestamp: faker.date.past().toString(),
+    attachments: [],
     ...obj,
   });
 }

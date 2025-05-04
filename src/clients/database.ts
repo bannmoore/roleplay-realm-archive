@@ -234,7 +234,9 @@ class DatabaseClient {
       .execute();
   }
 
-  async upsertChannel(channel: Unsaved<Channel>): Promise<Channel | undefined> {
+  async upsertChannel(
+    channel: Unsaved<Omit<Channel, "lastSyncedAt">>
+  ): Promise<Channel | undefined> {
     return this._db
       .with("inserted", (db) =>
         db
