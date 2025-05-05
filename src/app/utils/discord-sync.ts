@@ -47,10 +47,10 @@ export async function syncDiscordChannel(channel: Channel) {
     await sleep(1000);
   }
 
-  const threads = await database.getThreads(channel.id);
-  threads.forEach(async (thread) => {
+  const threadOrigins = await database.getThreadOriginMessages(channel.id);
+  threadOrigins.forEach(async (threadOrigin) => {
     await syncThread({
-      thread,
+      threadOrigin,
       authorUsers,
     });
   });
@@ -61,19 +61,21 @@ export async function syncDiscordChannel(channel: Channel) {
 }
 
 async function syncThread({
-  thread,
+  threadOrigin,
   authorUsers,
 }: {
-  thread: Message;
+  threadOrigin: Message;
   authorUsers: User[];
 }) {
-  const oldestThreadMessage = await database.getOldestThreadMessage(thread.id);
+  const oldestThreadMessage = await database.getOldestThreadMessage(
+    threadOrigin.id
+  );
   let oldestThreadMessageId = oldestThreadMessage?.discordId;
   let isSyncingThreads = true;
 
   while (isSyncingThreads) {
     const newDiscordThreadMessages = await discord.getThreadMessages(
-      thread.discordId,
+      threadOrigin.discordId,
       {
         beforeId: oldestThreadMessageId,
       }
@@ -85,9 +87,10 @@ async function syncThread({
     }
 
     const newUnsavedThreadMessages = zipMessagesAndAuthors({
-      channelId: thread.channelId,
+      channelId: threadOrigin.channelId,
       users: authorUsers,
       messages: newDiscordThreadMessages,
+      threadOrigin,
     });
 
     if (newUnsavedThreadMessages.length) {
@@ -151,10 +154,12 @@ function zipMessagesAndAuthors({
   channelId,
   users,
   messages,
+  threadOrigin,
 }: {
   channelId: string;
   users: User[];
   messages: DiscordMessage[];
+  threadOrigin?: Message;
 }): Unsaved<Message>[] {
   return messages.flatMap((message) => {
     const author = users.find((user) => user.discordId === message.author.id);
@@ -169,7 +174,7 @@ function zipMessagesAndAuthors({
             content,
             discordPublishedAt: new Date(message.timestamp),
             isThread: !!message.thread,
-            threadId: null,
+            threadId: threadOrigin?.id ?? null,
           },
         ]
       : [];

@@ -302,7 +302,7 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
-  async getThreads(channelId: string): Promise<Message[]> {
+  async getThreadOriginMessages(channelId: string): Promise<Message[]> {
     return this._db
       .selectFrom("messages")
       .selectAll("messages")

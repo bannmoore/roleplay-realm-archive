@@ -5,10 +5,16 @@ import discord from "@/clients/discord";
 import { syncDiscordChannel } from "./discord-sync";
 import { fakeArray } from "@/test/fakes";
 import {
+  fakeDiscordChannel,
   fakeDiscordMessage,
-  fakeDiscordUserFromDbUser,
+  fakeDiscordMessageAttachment,
+  fakeDiscordUser,
 } from "@/test/fakes/discord";
-import { fakeChannel, fakeMessage, fakeUser } from "@/test/fakes/database";
+import {
+  fakeChannel,
+  fakeMessage,
+  fakeUserFromDiscordUser,
+} from "@/test/fakes/database";
 import { faker } from "@faker-js/faker";
 
 vi.mock("@/clients/database");
@@ -43,7 +49,9 @@ describe("discord-sync", async () => {
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
         .thenResolve([]);
-      when(database.getThreads).calledWith(channel.id).thenResolve([]);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
 
       await syncDiscordChannel(channel);
 
@@ -57,17 +65,18 @@ describe("discord-sync", async () => {
       const fakeDate = faker.date.past();
       vi.setSystemTime(fakeDate);
 
-      const channel = fakeChannel();
-
-      const users = fakeArray(2, fakeUser);
-      const messages = [
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordMessages = [
         fakeDiscordMessage({
-          author: fakeDiscordUserFromDbUser(users[0]),
+          author: discordUsers[0],
         }),
         fakeDiscordMessage({
-          author: fakeDiscordUserFromDbUser(users[1]),
+          author: discordUsers[1],
         }),
       ];
+
+      const channel = fakeChannel();
+      const users = discordUsers.map(fakeUserFromDiscordUser);
 
       when(database.getServerUsers)
         .calledWith(channel.serverId)
@@ -77,34 +86,36 @@ describe("discord-sync", async () => {
         .thenResolve(undefined);
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
-        .thenResolve(messages);
+        .thenResolve(discordMessages);
       when(discord.getMessages)
         .calledWith(channel.discordId, {
-          beforeId: messages[messages.length - 1].id,
+          beforeId: discordMessages[discordMessages.length - 1].id,
         })
         .thenResolve([]);
 
       when(database.upsertMessages)
         .calledWith([
           expect.objectContaining({
-            discordId: messages[0].id,
+            discordId: discordMessages[0].id,
           }),
           expect.objectContaining({
-            discordId: messages[1].id,
+            discordId: discordMessages[1].id,
           }),
         ])
         .thenResolve([
           fakeMessage({
             authorId: users[0].id,
-            discordId: messages[0].id,
+            discordId: discordMessages[0].id,
           }),
           fakeMessage({
             authorId: users[1].id,
-            discordId: messages[1].id,
+            discordId: discordMessages[1].id,
           }),
         ]);
 
-      when(database.getThreads).calledWith(channel.id).thenResolve([]);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
 
       await syncDiscordChannel(channel);
 
@@ -119,22 +130,23 @@ describe("discord-sync", async () => {
       const fakeDate = faker.date.past();
       vi.setSystemTime(fakeDate);
 
-      const channel = fakeChannel();
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordMessagesLoop1 = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[1],
+        }),
+      ];
+      const discordMessagesLoop2 = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+      ];
 
-      const users = fakeArray(2, fakeUser);
-      const messagesLoop1 = [
-        fakeDiscordMessage({
-          author: fakeDiscordUserFromDbUser(users[0]),
-        }),
-        fakeDiscordMessage({
-          author: fakeDiscordUserFromDbUser(users[1]),
-        }),
-      ];
-      const messagesLoop2 = [
-        fakeDiscordMessage({
-          author: fakeDiscordUserFromDbUser(users[0]),
-        }),
-      ];
+      const channel = fakeChannel();
+      const users = discordUsers.map(fakeUserFromDiscordUser);
 
       when(database.getServerUsers)
         .calledWith(channel.serverId)
@@ -142,52 +154,54 @@ describe("discord-sync", async () => {
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
-      when(database.getThreads).calledWith(channel.id).thenResolve([]);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
 
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
-        .thenResolve(messagesLoop1);
+        .thenResolve(discordMessagesLoop1);
       when(discord.getMessages)
         .calledWith(channel.discordId, {
-          beforeId: messagesLoop1[messagesLoop1.length - 1].id,
+          beforeId: discordMessagesLoop1[discordMessagesLoop1.length - 1].id,
         })
-        .thenResolve(messagesLoop2);
+        .thenResolve(discordMessagesLoop2);
       when(discord.getMessages)
         .calledWith(channel.discordId, {
-          beforeId: messagesLoop2[messagesLoop2.length - 1].id,
+          beforeId: discordMessagesLoop2[discordMessagesLoop2.length - 1].id,
         })
         .thenResolve([]);
 
       when(database.upsertMessages)
         .calledWith([
           expect.objectContaining({
-            discordId: messagesLoop1[0].id,
+            discordId: discordMessagesLoop1[0].id,
           }),
           expect.objectContaining({
-            discordId: messagesLoop1[1].id,
+            discordId: discordMessagesLoop1[1].id,
           }),
         ])
         .thenResolve([
           fakeMessage({
             authorId: users[0].id,
-            discordId: messagesLoop1[0].id,
+            discordId: discordMessagesLoop1[0].id,
           }),
           fakeMessage({
             authorId: users[1].id,
-            discordId: messagesLoop1[1].id,
+            discordId: discordMessagesLoop1[1].id,
           }),
         ]);
 
       when(database.upsertMessages)
         .calledWith([
           expect.objectContaining({
-            discordId: messagesLoop2[0].id,
+            discordId: discordMessagesLoop2[0].id,
           }),
         ])
         .thenResolve([
           fakeMessage({
             authorId: users[0].id,
-            discordId: messagesLoop2[0].id,
+            discordId: discordMessagesLoop2[0].id,
           }),
         ]);
 
@@ -198,6 +212,179 @@ describe("discord-sync", async () => {
       expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
         lastSyncedAt: new Date(fakeDate.getTime() + 2000),
       });
+    });
+
+    test("syncs thread messages through channel sync", async () => {
+      const fakeDate = faker.date.past();
+      vi.setSystemTime(fakeDate);
+
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordThread = fakeDiscordChannel();
+      const discordChannelMessages = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[1],
+          thread: discordThread,
+        }),
+      ];
+      const discordThreadMessages = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+      ];
+
+      const users = discordUsers.map(fakeUserFromDiscordUser);
+      const channel = fakeChannel();
+      const createdThreadOrigin = fakeMessage({
+        discordId: discordThreadMessages[0].id,
+      });
+
+      when(discord.getMessages)
+        .calledWith(channel.discordId, { beforeId: undefined })
+        .thenResolve(discordChannelMessages);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          beforeId:
+            discordChannelMessages[discordChannelMessages.length - 1].id,
+        })
+        .thenResolve([]);
+
+      when(discord.getThreadMessages)
+        .calledWith(createdThreadOrigin.discordId, { beforeId: undefined })
+        .thenResolve(discordThreadMessages);
+
+      when(database.getServerUsers)
+        .calledWith(channel.serverId)
+        .thenResolve(users);
+      when(database.getOldestMessage)
+        .calledWith(channel.id)
+        .thenResolve(undefined);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([createdThreadOrigin]);
+
+      when(database.getOldestThreadMessage)
+        .calledWith(createdThreadOrigin.id)
+        .thenResolve(undefined);
+      when(discord.getThreadMessages)
+        .calledWith(createdThreadOrigin.discordId, {
+          beforeId: discordThreadMessages[discordThreadMessages.length - 1].id,
+        })
+        .thenResolve([]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
+            discordId: discordChannelMessages[0].id,
+          }),
+          expect.objectContaining({
+            discordId: discordChannelMessages[1].id,
+          }),
+        ])
+        .thenResolve([
+          fakeMessage({
+            authorId: users[0].id,
+            discordId: discordChannelMessages[0].id,
+            threadId: createdThreadOrigin.id,
+          }),
+          fakeMessage({
+            authorId: users[1].id,
+            discordId: discordChannelMessages[1].id,
+            threadId: createdThreadOrigin.id,
+          }),
+        ]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
+            discordId: discordThreadMessages[0].id,
+            threadId: createdThreadOrigin.id,
+          }),
+        ])
+        .thenResolve([
+          fakeMessage({
+            authorId: users[0].id,
+            discordId: discordThreadMessages[0].id,
+            threadId: createdThreadOrigin.id,
+          }),
+        ]);
+
+      await syncDiscordChannel(channel);
+
+      expect(database.upsertMessages).toHaveBeenCalledTimes(2);
+
+      expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
+        lastSyncedAt: new Date(fakeDate.getTime() + 1000),
+      });
+    });
+
+    test("syncs message attachments through channel sync", async () => {
+      const fakeDate = faker.date.past();
+      vi.setSystemTime(fakeDate);
+
+      const discordUsers = fakeArray(1, fakeDiscordUser);
+      const discordMessage = fakeDiscordMessage({
+        author: discordUsers[0],
+        attachments: [
+          fakeDiscordMessageAttachment(),
+          fakeDiscordMessageAttachment(),
+        ],
+      });
+
+      const channel = fakeChannel();
+      const users = discordUsers.map(fakeUserFromDiscordUser);
+      const createdMessage = fakeMessage({
+        channelId: channel.id,
+        authorId: users[0].id,
+        discordId: discordMessage.id,
+      });
+
+      when(database.getServerUsers)
+        .calledWith(channel.serverId)
+        .thenResolve(users);
+      when(database.getOldestMessage)
+        .calledWith(channel.id)
+        .thenResolve(undefined);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, { beforeId: undefined })
+        .thenResolve([discordMessage]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          beforeId: discordMessage.id,
+        })
+        .thenResolve([]);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
+            discordId: discordMessage.id,
+          }),
+        ])
+        .thenResolve([createdMessage]);
+
+      await syncDiscordChannel(channel);
+
+      expect(database.upsertMessagesAttachments).toHaveBeenCalledWith([
+        {
+          messageId: createdMessage.id,
+          discordSourceUri: discordMessage.attachments[0].url,
+          sourceUri: null,
+          width: discordMessage.attachments[0].width,
+          height: discordMessage.attachments[0].height,
+        },
+        {
+          messageId: createdMessage.id,
+          discordSourceUri: discordMessage.attachments[1].url,
+          sourceUri: null,
+          width: discordMessage.attachments[1].width,
+          height: discordMessage.attachments[1].height,
+        },
+      ]);
     });
   });
 });

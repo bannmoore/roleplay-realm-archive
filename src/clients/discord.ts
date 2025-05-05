@@ -152,11 +152,11 @@ export type DiscordMessage = {
   content?: string;
   timestamp: string;
   thread?: DiscordChannel;
-  attachments: DiscordAttachment[];
+  attachments: DiscordMessageAttachment[];
 };
 
 // https://discord.com/developers/docs/resources/message#attachment-object
-export type DiscordAttachment = {
+export type DiscordMessageAttachment = {
   id: string;
   filename: string;
   content_type: string;
