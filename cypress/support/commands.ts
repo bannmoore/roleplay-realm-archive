@@ -16,7 +16,7 @@ Cypress.Commands.add("logout", () => {
 });
 
 Cypress.Commands.add("login", () => {
-  cy.visit("/api/auth/signin");
+  cy.visit("/api/nextauth/signin");
 
   cy.get('input[name="username"]').type(Cypress.env("CYPRESS_USERNAME"));
   cy.get('input[name="password"]').type(Cypress.env("CYPRESS_PASSWORD"));

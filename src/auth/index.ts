@@ -21,6 +21,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // trustHost is equired for Docker deployment
   // Ref: https://authjs.dev/getting-started/deployment#docker
   trustHost: true,
+  // Google flags the original path as a security risk, so we use a custom path
+  // Ref: https://github.com/nextauthjs/next-auth/discussions/7238
+  basePath: "/api/nextauth",
   providers,
   callbacks: {
     jwt: jwtCallback,
