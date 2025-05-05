@@ -151,7 +151,7 @@ describe("discord-sync", async () => {
         }),
         fakeDiscordMessage({
           author: discordUsers[0],
-          content: `<@${discordUsers[1].id}>`,
+          content: `<@${discordUsers[1].id}> <@${discordUsers[1].id}>`,
         }),
       ];
 

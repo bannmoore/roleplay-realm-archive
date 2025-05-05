@@ -148,7 +148,7 @@ function sleep(ms: number) {
 
 // Trim whitespace and mentions (@username) from message content
 function trimMessageContent(content?: string) {
-  return content?.replace(/<@[0-9]+>/, "").trim();
+  return content?.replaceAll(/<@[0-9]+>/g, "").trim();
 }
 
 function zipMessagesAndAuthors({
