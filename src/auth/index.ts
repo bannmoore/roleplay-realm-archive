@@ -23,7 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers,
   callbacks: {
-    jwt: process.env.NODE_ENV === "development" ? jwtCallback : undefined,
+    jwt: jwtCallback,
     async session({ session, token }) {
       // Short-circuit for e2e test user
       if (process.env.NODE_ENV === "development" && token.isTestUser) {

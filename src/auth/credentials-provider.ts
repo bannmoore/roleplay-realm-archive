@@ -38,7 +38,7 @@ export const testCredentialsProvider = Credentials({
 // In a Cypress scenario, pass user from Credentials provider to session
 // Ref: https://github.com/nextauthjs/next-auth/discussions/7033#discussioncomment-5448155
 export function jwtCallback({ token, user }: { token: JWT; user: User }): JWT {
-  if (user?.id === TEST_DISCORD_ID) {
+  if (process.env.NODE_ENV === "development" && user?.id === TEST_DISCORD_ID) {
     return { ...token, user, isTestUser: true };
   }
   return token;
