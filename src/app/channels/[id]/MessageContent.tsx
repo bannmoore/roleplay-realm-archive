@@ -12,5 +12,10 @@ export default function MessageContent({ message }: { message: Message }) {
     }
   }, [message.content]);
 
-  return <p dangerouslySetInnerHTML={{ __html: content }} />;
+  return (
+    <p
+      dangerouslySetInnerHTML={{ __html: content }}
+      className="message-content"
+    />
+  );
 }
