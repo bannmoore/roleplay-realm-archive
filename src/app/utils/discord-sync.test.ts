@@ -126,6 +126,99 @@ describe("discord-sync", async () => {
       });
     });
 
+    test("filter out messages with no story content and no attachments", async () => {
+      const fakeDate = faker.date.past();
+      vi.setSystemTime(fakeDate);
+
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordMessages = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+          content: "",
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[1],
+          content: "Actual content!",
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[1],
+          content: `<@${discordUsers[0].id}>`,
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[0],
+          content: "",
+          attachments: [fakeDiscordMessageAttachment()],
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[0],
+          content: `<@${discordUsers[1].id}>`,
+        }),
+      ];
+
+      const channel = fakeChannel();
+      const users = discordUsers.map(fakeUserFromDiscordUser);
+      const createdMessages = [
+        fakeMessage({
+          channelId: channel.id,
+          authorId: users[1].id,
+          discordId: discordMessages[1].id,
+        }),
+        fakeMessage({
+          channelId: channel.id,
+          authorId: users[0].id,
+          discordId: discordMessages[3].id,
+        }),
+      ];
+
+      when(database.getServerUsers)
+        .calledWith(channel.serverId)
+        .thenResolve(users);
+      when(database.getOldestMessage)
+        .calledWith(channel.id)
+        .thenResolve(undefined);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, { beforeId: undefined })
+        .thenResolve(discordMessages);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          beforeId: discordMessages[3].id,
+        })
+        .thenResolve([]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
+            discordId: discordMessages[1].id,
+          }),
+          expect.objectContaining({
+            discordId: discordMessages[3].id,
+          }),
+        ])
+        .thenResolve(createdMessages);
+
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
+
+      await syncDiscordChannel(channel);
+
+      expect(database.upsertMessages).toHaveBeenCalledTimes(1);
+
+      expect(database.upsertMessagesAttachments).toHaveBeenCalledWith([
+        {
+          messageId: createdMessages[1].id,
+          discordSourceUri: discordMessages[3].attachments[0].url,
+          sourceUri: null,
+          width: discordMessages[3].attachments[0].width,
+          height: discordMessages[3].attachments[0].height,
+        },
+      ]);
+
+      expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
+        lastSyncedAt: new Date(fakeDate.getTime() + 1000),
+      });
+    });
+
     test("upserts multiple loops of new messages", async () => {
       const fakeDate = faker.date.past();
       vi.setSystemTime(fakeDate);

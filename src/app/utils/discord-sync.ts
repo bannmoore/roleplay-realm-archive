@@ -42,14 +42,15 @@ export async function syncDiscordChannel(channel: Channel) {
       });
     }
 
-    oldestMessageId = newDiscordMessages[newDiscordMessages.length - 1].id;
+    oldestMessageId =
+      newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
 
     await sleep(1000);
   }
 
   const threadOrigins = await database.getThreadOriginMessages(channel.id);
   threadOrigins.forEach(async (threadOrigin) => {
-    await syncThread({
+    await syncDiscordMessageThread({
       threadOrigin,
       authorUsers,
     });
@@ -60,7 +61,7 @@ export async function syncDiscordChannel(channel: Channel) {
   });
 }
 
-async function syncThread({
+async function syncDiscordMessageThread({
   threadOrigin,
   authorUsers,
 }: {
@@ -105,7 +106,7 @@ async function syncThread({
     }
 
     oldestThreadMessageId =
-      newDiscordThreadMessages[newDiscordThreadMessages.length - 1].id;
+      newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
 
     await sleep(1000);
   }
@@ -165,13 +166,13 @@ function zipMessagesAndAuthors({
     const author = users.find((user) => user.discordId === message.author.id);
     const content = trimMessageContent(message.content);
 
-    return author && content
+    return author && (content || message.attachments?.length)
       ? [
           {
             channelId,
             discordId: message.id,
             authorId: author.id,
-            content,
+            content: content ?? null,
             discordPublishedAt: new Date(message.timestamp),
             isThread: !!message.thread,
             threadId: threadOrigin?.id ?? null,
