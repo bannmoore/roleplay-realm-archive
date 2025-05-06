@@ -3,10 +3,11 @@ import { config } from "@/config";
 let userToken: string | null = null;
 
 class DiscordClient {
-  private _apiUrl: string = "https://discord.com/api/v10";
+  private _apiUrl: string;
   private _botToken: string;
 
-  constructor({ botToken }: { botToken: string }) {
+  constructor({ apiUrl, botToken }: { apiUrl: string; botToken: string }) {
+    this._apiUrl = apiUrl;
     this._botToken = botToken;
   }
 
@@ -108,6 +109,7 @@ class DiscordClient {
 
 const discord = Object.freeze(
   new DiscordClient({
+    apiUrl: config.discordApiUrl,
     botToken: config.discordBotToken,
   })
 );

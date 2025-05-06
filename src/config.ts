@@ -2,6 +2,7 @@ export const config = {
   baseUrl: process.env.BASE_URL || "",
   databaseUrl: process.env.DATABASE_URL || "",
   databaseCert: process.env.DATABASE_CERT || "",
+  discordApiUrl: process.env.DISCORD_API_URL || "",
   discordBotToken: process.env.DISCORD_BOT_TOKEN || "",
   discordClientId: process.env.DISCORD_CLIENT_ID || "",
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET || "",
