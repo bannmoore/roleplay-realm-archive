@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 
 const TEST_USERNAME = process.env.CYPRESS_USERNAME;
 const TEST_PASSWORD = process.env.CYPRESS_PASSWORD;
-const TEST_DISCORD_ID = "1234abcd";
+const TEST_DISCORD_ID = "111111111111111111";
 const TEST_DISCORD_USERNAME = "test_user";
 
 /* https://authjs.dev/guides/testing */

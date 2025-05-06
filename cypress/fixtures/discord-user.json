@@ -1,0 +1,16 @@
+{
+  "id": "111111111111111111",
+  "username": "test_user",
+  "avatar": "",
+  "discriminator": "0",
+  "public_flags": 0,
+  "flags": 0,
+  "banner": null,
+  "accent_color": null,
+  "global_name": "TEST USER",
+  "avatar_decoration_data": null,
+  "collectibles": null,
+  "banner_color": null,
+  "clan": null,
+  "primary_guild": null
+}

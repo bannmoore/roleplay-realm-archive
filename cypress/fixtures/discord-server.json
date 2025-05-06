@@ -1,0 +1,9 @@
+{
+  "id": "1111111111111111111",
+  "name": "TEST SERVER",
+  "icon": "",
+  "banner": null,
+  "owner": false,
+  "permissions": "2248473465835073",
+  "features": ["CHANNEL_ICON_EMOJIS_GENERATED"]
+}
