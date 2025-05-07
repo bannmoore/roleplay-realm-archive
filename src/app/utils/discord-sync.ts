@@ -40,10 +40,10 @@ export async function syncDiscordChannel(channel: Channel) {
         discordMessages: newDiscordMessages,
         dbMessages: createdMessages,
       });
-    }
 
-    oldestMessageId =
-      newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
+      oldestMessageId =
+        newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
+    }
 
     await sleep(1000);
   }
@@ -103,10 +103,10 @@ async function syncDiscordMessageThread({
         discordMessages: newDiscordThreadMessages,
         dbMessages: createdThreadMessages,
       });
-    }
 
-    oldestThreadMessageId =
-      newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
+      oldestThreadMessageId =
+        newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
+    }
 
     await sleep(1000);
   }
