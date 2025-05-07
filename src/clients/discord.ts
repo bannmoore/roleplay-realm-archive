@@ -19,10 +19,6 @@ class DiscordClient {
     userToken = token;
   }
 
-  async getUser(): Promise<DiscordUser> {
-    return this.getWithUserAuth("/users/@me");
-  }
-
   async getGuild(id: string): Promise<DiscordGuild | null> {
     return this.getWithBotAuth(`/guilds/${id}`);
   }
