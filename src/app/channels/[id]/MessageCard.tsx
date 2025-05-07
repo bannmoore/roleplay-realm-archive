@@ -7,7 +7,7 @@ interface MessageCardProps {
 
 export default function MessageCard({ message }: MessageCardProps) {
   return (
-    <div className="mb-4 bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg">
+    <div className="mb-4 card">
       <div className="flex mb-2">
         <span className="flex-1">{message.authorUsername}</span>
         <span>

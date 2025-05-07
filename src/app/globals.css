@@ -32,6 +32,10 @@
     @apply text-lg font-bold;
   }
 
+  .card {
+    @apply bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg;
+  }
+
   .message-content p {
     @apply mb-4
   }

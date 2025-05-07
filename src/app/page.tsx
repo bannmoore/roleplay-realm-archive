@@ -1,9 +1,10 @@
 import database from "@/clients/database";
-import { RefreshServersButton } from "@/app/home/RefreshServersButton";
+import { SyncServersButton } from "@/app/home/SyncServersButton";
 import Image from "next/image";
 import Link from "next/link";
 import { checkAuthenticated } from "@/util";
 import { notFound } from "next/navigation";
+import Alert from "./components/Alert";
 
 export default async function HomePage() {
   const user = await checkAuthenticated();
@@ -16,6 +17,20 @@ export default async function HomePage() {
 
   return (
     <>
+      <div className="flex items-center justify-between my-4">
+        <h1>Servers</h1>
+        <div className="inline-block ml-4">
+          <Link href="/help/about-the-bot" className="link mr-4">
+            What&apos;s this?
+          </Link>
+          <SyncServersButton />
+        </div>
+      </div>
+
+      <div className="my-4">
+        <Alert />
+      </div>
+
       {servers.map((server) => (
         <Link
           key={server.id}
@@ -32,8 +47,6 @@ export default async function HomePage() {
           <div>{server.name}</div>
         </Link>
       ))}
-
-      <RefreshServersButton />
     </>
   );
 }

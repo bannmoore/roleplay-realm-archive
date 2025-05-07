@@ -36,10 +36,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
 
   return (
     <div className="mb-4">
-      <div
-        className="bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg cursor-pointer hover:bg-darkpurple-800 transition-colors"
-        onClick={handleClick}
-      >
+      <div className="card" onClick={handleClick}>
         <div className="flex mb-2">
           <span className="flex-1">{message.authorUsername}</span>
           <span>
