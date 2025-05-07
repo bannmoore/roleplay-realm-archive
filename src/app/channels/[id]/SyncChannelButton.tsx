@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import { syncChannelAction } from "./actions";
+import { syncChannel } from "./actions";
 import { Channel } from "@/clients/database";
 import { AlertContext } from "@/app/components/AlertContext";
 
@@ -17,7 +17,7 @@ export default function SyncChannelButton({ channel }: { channel: Channel }) {
         setAlert(null);
         setIsSyncing(true);
 
-        await syncChannelAction(channel)
+        await syncChannel(channel)
           .then(() =>
             setAlert({ message: "Channel synced", variant: "success" })
           )

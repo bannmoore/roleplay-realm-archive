@@ -5,7 +5,7 @@ import type { Channel, MessageWithDisplayData } from "@/clients/database";
 import database from "@/clients/database";
 import { revalidatePath } from "next/cache";
 
-export async function syncChannelAction(channel: Channel) {
+export async function syncChannel(channel: Channel) {
   await syncDiscordChannel(channel);
 
   revalidatePath(`channels/${channel.id}`, "page");

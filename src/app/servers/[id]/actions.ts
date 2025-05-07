@@ -11,7 +11,7 @@ export async function getChannelOptions(serverDiscordId: string) {
   return all.filter((c) => c.parent_id);
 }
 
-export async function syncChannel(
+export async function createAndSyncChannel(
   serverId: string,
   discordChannel: DiscordChannel
 ) {

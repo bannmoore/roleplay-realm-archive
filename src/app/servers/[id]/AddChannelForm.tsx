@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { getChannelOptions, syncChannel } from "./actions";
+import { getChannelOptions, createAndSyncChannel } from "./actions";
 import type { DiscordChannel } from "@/clients/discord";
 
 export function AddChannelForm({
@@ -29,7 +29,7 @@ export function AddChannelForm({
 
     if (selectedChannelId && channel) {
       setIsSyncing(true);
-      await syncChannel(serverId, channel);
+      await createAndSyncChannel(serverId, channel);
       setIsSyncing(false);
     }
   }
