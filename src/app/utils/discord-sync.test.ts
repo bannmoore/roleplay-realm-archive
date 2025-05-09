@@ -207,6 +207,7 @@ describe("discord-sync", async () => {
       expect(database.upsertMessagesAttachments).toHaveBeenCalledWith([
         {
           messageId: createdMessages[1].id,
+          discordId: discordMessages[3].attachments[0].id,
           discordSourceUri: discordMessages[3].attachments[0].url,
           sourceUri: null,
           width: discordMessages[3].attachments[0].width,
@@ -465,6 +466,7 @@ describe("discord-sync", async () => {
       expect(database.upsertMessagesAttachments).toHaveBeenCalledWith([
         {
           messageId: createdMessage.id,
+          discordId: discordMessage.attachments[0].id,
           discordSourceUri: discordMessage.attachments[0].url,
           sourceUri: null,
           width: discordMessage.attachments[0].width,
@@ -472,6 +474,7 @@ describe("discord-sync", async () => {
         },
         {
           messageId: createdMessage.id,
+          discordId: discordMessage.attachments[1].id,
           discordSourceUri: discordMessage.attachments[1].url,
           sourceUri: null,
           width: discordMessage.attachments[1].width,

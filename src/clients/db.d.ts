@@ -39,6 +39,7 @@ export interface Messages {
 
 export interface MessagesAttachments {
   createdAt: Generated<Timestamp>;
+  discordId: string;
   discordSourceUri: string;
   height: number | null;
   id: Generated<Int8>;

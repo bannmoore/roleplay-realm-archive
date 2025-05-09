@@ -127,6 +127,7 @@ async function syncMessageAttachments({
     if (dbMessage) {
       attachments = attachments.concat(
         discordMessage.attachments.map((attachment) => ({
+          discordId: attachment.id,
           messageId: dbMessage.id,
           discordSourceUri: attachment.url,
           sourceUri: null,
