@@ -27,21 +27,24 @@ export default async function Page({
   return (
     <div className="text-left">
       <div className="flex items-center justify-between my-4">
-        <div>
-          <h1>{channel.name}</h1>{" "}
+        <div className="flex items-center gap-2">
+          <h1>{channel.name}</h1>
           <Link href={`/servers/${channel.serverId}`} className="link">
             Back
           </Link>
         </div>
-        <span>
+        <div className="flex items-center">
           Last synced:{" "}
           {channel.lastSyncedAt
             ? channel.lastSyncedAt.toLocaleString()
             : "Never"}
-          <div className="inline-block ml-4">
+          <div className="ml-4 flex gap-2">
             <SyncChannelButton channel={channel} />
+            <Link href={`/channels/${channel.id}/manage`} className="button">
+              Manage
+            </Link>
           </div>
-        </span>
+        </div>
       </div>
 
       <div className="my-4">

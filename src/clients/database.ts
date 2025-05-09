@@ -361,6 +361,15 @@ class DatabaseClient {
       .execute();
   }
 
+  async getChannelAttachments(channelId: string): Promise<MessageAttachment[]> {
+    return this._db
+      .selectFrom("messagesAttachments")
+      .innerJoin("messages", "messagesAttachments.messageId", "messages.id")
+      .selectAll("messagesAttachments")
+      .where("channelId", "=", channelId)
+      .execute();
+  }
+
   async upsertMessagesAttachments(
     messagesAttachments: Unsaved<MessageAttachment>[]
   ): Promise<MessageAttachment[]> {

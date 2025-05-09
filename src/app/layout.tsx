@@ -63,7 +63,7 @@ export default async function RootLayout({
             )}
           </div>
         </header>
-        <main className="container m-auto p-4 text-center">
+        <main className="container m-auto p-4">
           <AlertProvider>
             {user ? children : <div>Please sign in.</div>}
           </AlertProvider>
