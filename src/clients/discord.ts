@@ -41,6 +41,16 @@ class DiscordClient {
     return this.getWithBotAuth(`/guilds/${guildId}/channels`);
   }
 
+  async getMessage({
+    channelId,
+    messageId,
+  }: {
+    channelId: string;
+    messageId: string;
+  }): Promise<DiscordMessage> {
+    return this.getWithBotAuth(`/channels/${channelId}/messages/${messageId}`);
+  }
+
   async getMessages(
     channelId: string,
     { beforeId }: { beforeId?: string } = {}

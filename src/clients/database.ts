@@ -263,6 +263,14 @@ class DatabaseClient {
       .execute();
   }
 
+  async getMessage(messageId: string): Promise<Message | undefined> {
+    return this._db
+      .selectFrom("messages")
+      .selectAll()
+      .where("id", "=", messageId)
+      .executeTakeFirst();
+  }
+
   async getRecentMessages(
     channelId: string,
     {
@@ -359,6 +367,16 @@ class DatabaseClient {
           .doUpdateSet({ content: (eb) => eb.ref("excluded.content") })
       )
       .execute();
+  }
+
+  async getAttachment(
+    attachmentId: string
+  ): Promise<MessageAttachment | undefined> {
+    return this._db
+      .selectFrom("messagesAttachments")
+      .selectAll("messagesAttachments")
+      .where("id", "=", attachmentId)
+      .executeTakeFirst();
   }
 
   async getChannelAttachments(channelId: string): Promise<MessageAttachment[]> {

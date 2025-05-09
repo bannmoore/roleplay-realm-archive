@@ -1,5 +1,8 @@
+import Alert from "@/app/components/Alert";
 import database from "@/clients/database";
 import Link from "next/link";
+import SyncImageButton from "./SyncImageButton";
+import { syncImage } from "./actions";
 
 export default async function Page({
   params,
@@ -17,18 +20,26 @@ export default async function Page({
           Back
         </Link>
       </div>
+
+      <div className="my-4">
+        <Alert />
+      </div>
+
       <div>
         <table className="w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
           <thead className="bg-gray-700">
             <tr>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Id
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Migrated to Storage
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Link
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                Actions
               </th>
             </tr>
           </thead>
@@ -49,6 +60,14 @@ export default async function Page({
                   >
                     View
                   </a>
+                </td>
+                <td className="px-6 py-4 text-center text-sm text-gray-300">
+                  {!attachment.sourceUri ? (
+                    <SyncImageButton
+                      attachmentId={attachment.id}
+                      onClickAction={syncImage}
+                    />
+                  ) : null}
                 </td>
               </tr>
             ))}
