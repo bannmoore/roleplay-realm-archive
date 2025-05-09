@@ -264,7 +264,14 @@ class DatabaseClient {
   }
 
   async getRecentMessages(
-    channelId: string
+    channelId: string,
+    {
+      limit,
+      offset,
+    }: {
+      limit: number;
+      offset: number;
+    }
   ): Promise<MessageWithDisplayData[]> {
     return this._db
       .with("reversed", (db) =>
@@ -280,7 +287,8 @@ class DatabaseClient {
             eb("channelId", "=", channelId).and("threadId", "is", null)
           )
           .orderBy("discordPublishedAt desc")
-          .limit(2)
+          .limit(limit)
+          .offset(offset)
       )
       .selectFrom("reversed")
       .selectAll()
