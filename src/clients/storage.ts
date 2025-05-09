@@ -31,26 +31,26 @@ class StorageClient {
   }
 
   async uploadMessageAttachment({
-    file,
+    buf,
     filename,
     serverId,
     channelId,
     messageId,
   }: {
-    file: File;
+    buf: ArrayBuffer;
     filename: string;
     serverId: string;
     channelId: string;
     messageId: string;
   }): Promise<string> {
-    const arrayBuffer = await file.arrayBuffer();
-    const fileContent = Buffer.from(arrayBuffer);
+    const fileContent = Buffer.from(buf);
+    const path = `message-attachments/server-${serverId}/channel-${channelId}/message-${messageId}/${filename}`;
 
     return new Promise((resolve, reject) =>
       this._s3Client.putObject(
         {
           Bucket: this._bucketName,
-          Key: `sims/${filename}`,
+          Key: path,
           Body: fileContent,
         },
         (err, _data) => {
@@ -58,9 +58,7 @@ class StorageClient {
             reject(err);
           }
 
-          resolve(
-            `https://${this._bucketName}.${this._endpoint}/message-attachments/server-${serverId}/channel-${channelId}/message-${messageId}/${filename}`
-          );
+          resolve(`https://${this._bucketName}.${this._endpoint}/${path}`);
         }
       )
     );

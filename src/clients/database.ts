@@ -388,6 +388,17 @@ class DatabaseClient {
       .execute();
   }
 
+  async updateAttachment(
+    attachmentId: string,
+    update: Partial<Unsaved<MessageAttachment>>
+  ): Promise<void> {
+    await this._db
+      .updateTable("messagesAttachments")
+      .set(update)
+      .where("id", "=", attachmentId)
+      .execute();
+  }
+
   async upsertMessagesAttachments(
     messagesAttachments: Unsaved<MessageAttachment>[]
   ): Promise<MessageAttachment[]> {
