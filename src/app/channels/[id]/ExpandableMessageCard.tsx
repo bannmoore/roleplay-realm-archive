@@ -3,8 +3,8 @@
 import { MessageWithDisplayData } from "@/clients/database";
 import { getThreadMessages } from "./actions";
 import { useState } from "react";
-import Image from "next/image";
 import MessageContent from "./MessageContent";
+import Attachment from "./Attachment";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -46,13 +46,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
         </div>
         {message.attachments.map((attachment) => (
           <div className="p-4" key={attachment.id}>
-            <Image
-              src={attachment.sourceUri ?? attachment.discordSourceUri}
-              alt="Attachment"
-              width={attachment.width ?? 500}
-              height={attachment.height ?? 500}
-              className="m-auto"
-            />
+            <Attachment attachment={attachment} />
           </div>
         ))}
         <MessageContent message={message} />
@@ -83,13 +77,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
               </div>
               {threadMessage.attachments.map((attachment) => (
                 <div className="p-4" key={attachment.id}>
-                  <Image
-                    src={attachment.sourceUri ?? attachment.discordSourceUri}
-                    alt="Attachment"
-                    width={attachment.width ?? 500}
-                    height={attachment.height ?? 500}
-                    className="m-auto"
-                  />
+                  <Attachment attachment={attachment} />
                 </div>
               ))}
               <MessageContent message={threadMessage} />

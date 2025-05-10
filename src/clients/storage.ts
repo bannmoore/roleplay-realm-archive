@@ -1,5 +1,6 @@
 import { config } from "@/config";
-import { S3 } from "@aws-sdk/client-s3";
+import { S3, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 class StorageClient {
   private _s3Client: S3;
@@ -62,6 +63,21 @@ class StorageClient {
         }
       )
     );
+  }
+
+  async getPresignedUrl(url: string) {
+    const path = url.replaceAll(
+      "https://roleplay-realm-archive-storage.sfo3.digitaloceanspaces.com/",
+      ""
+    );
+    const command = new GetObjectCommand({
+      Bucket: this._bucketName,
+      Key: path,
+    });
+    const newUrl = await getSignedUrl(this._s3Client, command, {
+      expiresIn: 60 * 60 * 24, // 30 days
+    });
+    return newUrl;
   }
 }
 

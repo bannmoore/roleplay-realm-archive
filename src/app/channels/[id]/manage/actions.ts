@@ -26,17 +26,7 @@ export async function syncAllImages(channelId: string) {
     });
     await sleep(1000);
 
-    if (!discordMessage.attachments) {
-      console.log(
-        "discordMessage",
-        channel.discordId,
-        message.discordId,
-        discordMessage
-      );
-    }
-
     for (const discordAttachment of discordMessage.attachments) {
-      console.log("discordAttachment.id", discordAttachment.id);
       const attachment = attachments.find(
         (a) => a.discordId === discordAttachment.id
       );
@@ -53,7 +43,6 @@ export async function syncAllImages(channelId: string) {
         attachmentId: attachment.id,
       });
 
-      console.log("sleep");
       await sleep(1000);
     }
   }
@@ -84,7 +73,6 @@ export async function syncImage({
     messageId: messageId,
   });
 
-  console.log("updateAttachment", attachmentId, uri);
   await database.updateAttachment(attachmentId, {
     sourceUri: uri,
   });
