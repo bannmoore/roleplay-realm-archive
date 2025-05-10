@@ -59,7 +59,7 @@ class StorageClient {
             reject(err);
           }
 
-          resolve(`https://${this._bucketName}.${this._endpoint}/${path}`);
+          resolve(path);
         }
       )
     );
