@@ -47,7 +47,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
         {message.attachments.map((attachment) => (
           <div className="p-4" key={attachment.id}>
             <Image
-              src={attachment.discordSourceUri}
+              src={attachment.sourceUri ?? attachment.discordSourceUri}
               alt="Attachment"
               width={attachment.width ?? 500}
               height={attachment.height ?? 500}
@@ -84,7 +84,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
               {threadMessage.attachments.map((attachment) => (
                 <div className="p-4" key={attachment.id}>
                   <Image
-                    src={attachment.discordSourceUri}
+                    src={attachment.sourceUri ?? attachment.discordSourceUri}
                     alt="Attachment"
                     width={attachment.width ?? 500}
                     height={attachment.height ?? 500}

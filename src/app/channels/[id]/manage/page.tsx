@@ -1,8 +1,7 @@
 import Alert from "@/app/components/Alert";
 import database from "@/clients/database";
 import Link from "next/link";
-import SyncImageButton from "./SyncImageButton";
-import { syncImage } from "./actions";
+import SyncAllImagesButton from "./SyncAllImagesButton";
 
 export default async function Page({
   params,
@@ -14,11 +13,14 @@ export default async function Page({
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-4">
-        <h1>Images</h1>
-        <Link href={`/channels/${channelId}`} className="link">
-          Back
-        </Link>
+      <div className="flex items-center justify-between my-4">
+        <div className="flex items-center gap-2">
+          <h1>Manage Images</h1>
+          <Link href={`/channels/${channelId}`} className="link">
+            Back
+          </Link>
+        </div>
+        <SyncAllImagesButton channelId={channelId} />
       </div>
 
       <div className="my-4">
@@ -38,9 +40,9 @@ export default async function Page({
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Link
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+              {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Actions
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
@@ -61,14 +63,14 @@ export default async function Page({
                     View
                   </a>
                 </td>
-                <td className="px-6 py-4 text-center text-sm text-gray-300">
+                {/* <td className="px-6 py-4 text-center text-sm text-gray-300">
                   {!attachment.sourceUri ? (
                     <SyncImageButton
                       attachmentId={attachment.id}
                       onClickAction={syncImage}
                     />
                   ) : null}
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

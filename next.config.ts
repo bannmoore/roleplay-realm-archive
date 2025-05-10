@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/attachments/**",
       },
+      {
+        protocol: "https",
+        hostname: "roleplay-realm-archive-storage.sfo3.digitaloceanspaces.com",
+        port: "",
+        pathname: "**",
+      },
     ],
   },
 };

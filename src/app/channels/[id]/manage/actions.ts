@@ -1,55 +1,95 @@
 "use server";
 
 import database from "@/clients/database";
-import discord from "@/clients/discord";
+import discord, { DiscordMessageAttachment } from "@/clients/discord";
 import storage from "@/clients/storage";
 import { revalidatePath } from "next/cache";
 
-export async function syncImage(attachmentId: string) {
-  const attachment = await database.getAttachment(attachmentId);
-
-  if (!attachment) {
-    return;
-  }
-
-  const message = await database.getMessage(attachment.messageId);
-
-  if (!message) {
-    return;
-  }
-
-  const channel = await database.getChannel(message.channelId);
+export async function syncAllImages(channelId: string) {
+  const channel = await database.getChannel(channelId);
 
   if (!channel) {
     return;
   }
 
-  const discordMessage = await discord.getMessage({
-    channelId: channel.discordId,
-    messageId: message.discordId,
-  });
+  const messages = await database.getMessagesWithUnsyncedAttachments(channelId);
+  const attachments = messages.flatMap((message) => message.attachments);
 
-  const discordAttachment = discordMessage.attachments.find(
-    (a) => a.id === attachment.discordId
-  );
+  for (const message of messages) {
+    const threadOrigin = message.threadId
+      ? await database.getMessage(message.threadId)
+      : undefined;
 
-  if (!discordAttachment) {
-    return;
+    const discordMessage = await discord.getMessage({
+      channelId: threadOrigin?.discordId ?? channel.discordId,
+      messageId: message.discordId,
+    });
+    await sleep(1000);
+
+    if (!discordMessage.attachments) {
+      console.log(
+        "discordMessage",
+        channel.discordId,
+        message.discordId,
+        discordMessage
+      );
+    }
+
+    for (const discordAttachment of discordMessage.attachments) {
+      console.log("discordAttachment.id", discordAttachment.id);
+      const attachment = attachments.find(
+        (a) => a.discordId === discordAttachment.id
+      );
+
+      if (!attachment) {
+        return;
+      }
+
+      await syncImage({
+        discordAttachment,
+        serverId: channel.serverId,
+        channelId: channel.id,
+        messageId: message.id,
+        attachmentId: attachment.id,
+      });
+
+      console.log("sleep");
+      await sleep(1000);
+    }
   }
 
+  revalidatePath(`channels/${channelId}/manage`, "page");
+}
+
+export async function syncImage({
+  discordAttachment,
+  serverId,
+  channelId,
+  messageId,
+  attachmentId,
+}: {
+  discordAttachment: DiscordMessageAttachment;
+  serverId: string;
+  channelId: string;
+  messageId: string;
+  attachmentId: string;
+}) {
   const img = await fetch(discordAttachment.url);
   const buf = await img.arrayBuffer();
   const uri = await storage.uploadMessageAttachment({
     buf,
-    filename: attachment.id,
-    serverId: channel.serverId,
-    channelId: channel.id,
-    messageId: message.id,
+    filename: attachmentId,
+    serverId: serverId,
+    channelId: channelId,
+    messageId: messageId,
   });
 
+  console.log("updateAttachment", attachmentId, uri);
   await database.updateAttachment(attachmentId, {
     sourceUri: uri,
   });
+}
 
-  revalidatePath(`channels/${channel.id}/manage`, "page");
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

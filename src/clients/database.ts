@@ -352,6 +352,30 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
+  async getMessagesWithUnsyncedAttachments(channelId: string) {
+    return this._db
+      .selectFrom("messages")
+      .selectAll("messages")
+      .select(({ ref }) => [
+        this._messageAttachments(ref("messages.id")).as("attachments"),
+      ])
+      .where(({ exists, selectFrom }) =>
+        exists(
+          selectFrom("messagesAttachments")
+            .selectAll("messagesAttachments")
+            .where(({ eb, ref }) =>
+              eb("messages.id", "=", ref("messagesAttachments.messageId")).and(
+                "messagesAttachments.sourceUri",
+                "is",
+                null
+              )
+            )
+        )
+      )
+      .where("channelId", "=", channelId)
+      .execute();
+  }
+
   async upsertMessages(messages: Unsaved<Message>[]): Promise<Message[]> {
     if (!messages.length) {
       return [];
@@ -385,6 +409,7 @@ class DatabaseClient {
       .innerJoin("messages", "messagesAttachments.messageId", "messages.id")
       .selectAll("messagesAttachments")
       .where("channelId", "=", channelId)
+      .orderBy("messages.discordPublishedAt", "desc")
       .execute();
   }
 
