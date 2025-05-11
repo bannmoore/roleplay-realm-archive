@@ -31,22 +31,35 @@ export async function syncDiscordChannel(channel: Channel) {
       messages: newDiscordMessages,
     });
 
-    if (newUnsavedMessages.length) {
-      const createdMessages = await database.upsertMessages(newUnsavedMessages);
+    if (!newUnsavedMessages.length) {
+      continue;
+    }
+
+    const createdMessages = await database.upsertMessages(newUnsavedMessages);
+
+    for (const discordMessage of newDiscordMessages) {
+      const dbMessage = createdMessages.find(
+        (m) => m.discordId === discordMessage.id
+      );
+
+      if (!dbMessage) {
+        continue;
+      }
 
       await syncMessageAttachments({
-        discordMessages: newDiscordMessages,
-        dbMessages: createdMessages,
+        discordMessage,
+        dbMessage,
       });
-
-      oldestMessageId =
-        newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
     }
+
+    oldestMessageId =
+      newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
 
     await sleep(1000);
   }
 
   const threadOrigins = await database.getThreadOriginMessages(channel.id);
+
   threadOrigins.forEach(async (threadOrigin) => {
     await syncDiscordMessageThread({
       threadOrigin,
@@ -92,57 +105,63 @@ async function syncDiscordMessageThread({
       threadOrigin,
     });
 
-    if (newUnsavedThreadMessages.length) {
-      const createdThreadMessages = await database.upsertMessages(
-        newUnsavedThreadMessages
+    if (!newUnsavedThreadMessages.length) {
+      continue;
+    }
+
+    const createdThreadMessages = await database.upsertMessages(
+      newUnsavedThreadMessages
+    );
+
+    for (const discordMessage of newDiscordThreadMessages) {
+      const dbMessage = createdThreadMessages.find(
+        (m) => m.discordId === discordMessage.id
       );
 
-      await syncMessageAttachments({
-        discordMessages: newDiscordThreadMessages,
-        dbMessages: createdThreadMessages,
-      });
+      if (!dbMessage) {
+        continue;
+      }
 
-      oldestThreadMessageId =
-        newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
+      await syncMessageAttachments({
+        discordMessage,
+        dbMessage,
+      });
     }
 
     await sleep(1000);
+
+    oldestThreadMessageId =
+      newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
   }
 }
 
-async function syncMessageAttachments({
-  discordMessages,
-  dbMessages,
+export async function syncMessageAttachments({
+  discordMessage,
+  dbMessage,
 }: {
-  discordMessages: DiscordMessage[];
-  dbMessages: Message[];
+  discordMessage: DiscordMessage;
+  dbMessage: Message;
 }) {
-  for (const discordMessage of discordMessages) {
-    const dbMessage = dbMessages.find((m) => m.discordId === discordMessage.id);
+  const newAttachments = [];
+  for (const attachment of discordMessage.attachments) {
+    const path = await syncImage(dbMessage.id, attachment);
 
-    if (dbMessage) {
-      const newAttachments = [];
-      for (const attachment of discordMessage.attachments) {
-        const path = await syncImage(dbMessage.id, attachment);
-
-        newAttachments.push({
-          discordId: attachment.id,
-          messageId: dbMessage.id,
-          storagePath: path,
-          width: attachment.width ?? null,
-          height: attachment.height ?? null,
-        });
-      }
-
-      if (newAttachments.length) {
-        await database.upsertMessagesAttachments(newAttachments);
-      }
-
-      await database.updateMessage(dbMessage.id, {
-        lastSyncedAt: new Date(),
-      });
-    }
+    newAttachments.push({
+      discordId: attachment.id,
+      messageId: dbMessage.id,
+      storagePath: path,
+      width: attachment.width ?? null,
+      height: attachment.height ?? null,
+    });
   }
+
+  if (newAttachments.length) {
+    await database.upsertMessagesAttachments(newAttachments);
+  }
+
+  await database.updateMessage(dbMessage.id, {
+    lastSyncedAt: new Date(),
+  });
 }
 
 export async function syncImage(
@@ -157,7 +176,7 @@ export async function syncImage(
   });
 }
 
-function sleep(ms: number) {
+async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

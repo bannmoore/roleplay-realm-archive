@@ -352,6 +352,16 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
+  async getUnsyncedMessages(channelId: string) {
+    return this._db
+      .selectFrom("messages")
+      .selectAll("messages")
+      .where(({ eb, and }) =>
+        and([eb("channelId", "=", channelId), eb("lastSyncedAt", "is", null)])
+      )
+      .execute();
+  }
+
   async getMessagesWithUnsyncedAttachments(channelId: string) {
     return this._db
       .selectFrom("messages")

@@ -3,17 +3,16 @@
 import database from "@/clients/database";
 import discord from "@/clients/discord";
 import { revalidatePath } from "next/cache";
-import { syncImage } from "@/app/utils/discord-sync";
+import { syncMessageAttachments } from "@/app/utils/discord-sync";
 
-export async function syncAllImages(channelId: string) {
+export async function resyncMessages(channelId: string) {
   const channel = await database.getChannel(channelId);
 
   if (!channel) {
     return;
   }
 
-  const messages = await database.getMessagesWithUnsyncedAttachments(channelId);
-  const attachments = messages.flatMap((message) => message.attachments);
+  const messages = await database.getUnsyncedMessages(channelId);
 
   for (const message of messages) {
     const threadOrigin = message.threadId
@@ -24,25 +23,13 @@ export async function syncAllImages(channelId: string) {
       channelId: threadOrigin?.discordId ?? channel.discordId,
       messageId: message.discordId,
     });
+
+    await syncMessageAttachments({
+      discordMessage,
+      dbMessage: message,
+    });
+
     await sleep(1000);
-
-    for (const discordAttachment of discordMessage.attachments) {
-      const attachment = attachments.find(
-        (a) => a.discordId === discordAttachment.id
-      );
-
-      if (!attachment) {
-        return;
-      }
-
-      const path = await syncImage(message.id, discordAttachment);
-
-      await database.updateAttachment(attachment.id, {
-        storagePath: path,
-      });
-
-      await sleep(1000);
-    }
   }
 
   revalidatePath(`channels/${channelId}/manage`, "page");

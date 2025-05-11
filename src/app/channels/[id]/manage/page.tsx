@@ -1,7 +1,8 @@
 import Alert from "@/app/components/Alert";
 import database from "@/clients/database";
 import Link from "next/link";
-import SyncAllImagesButton from "./SyncAllImagesButton";
+import ResyncMessagesButton from "./ResyncMessagesButton";
+import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
@@ -9,23 +10,31 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const channelId = (await params).id;
-  const attachments = await database.getChannelAttachments(channelId);
+  const channel = await database.getChannel(channelId);
+
+  if (!channel) {
+    return notFound();
+  }
+
+  const unsyncedMessages = await database.getUnsyncedMessages(channelId);
 
   return (
     <>
       <div className="flex items-center justify-between my-4">
         <div className="flex items-center gap-2">
-          <h1>Manage Images</h1>
+          <h1>Manage Channel: {channel.name}</h1>
           <Link href={`/channels/${channelId}`} className="link">
             Back
           </Link>
         </div>
-        <SyncAllImagesButton channelId={channelId} />
+        <ResyncMessagesButton channelId={channelId} />
       </div>
 
       <div className="my-4">
         <Alert />
       </div>
+
+      <h2>Unsynced Messages</h2>
 
       <div>
         <table className="w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
@@ -35,42 +44,19 @@ export default async function Page({
                 Id
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
-                Migrated to Storage
+                Created at
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
-                Link
-              </th>
-              {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
-                Actions
-              </th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
-            {attachments.map((attachment) => (
-              <tr key={attachment.id} className="hover:bg-gray-700">
+            {unsyncedMessages.map((message) => (
+              <tr key={message.id} className="hover:bg-gray-700">
                 <td className="px-6 py-4 text-center text-sm text-gray-300">
-                  {attachment.id}
+                  {message.id}
                 </td>
                 <td className="px-6 py-4 text-center text-sm text-gray-300">
-                  {attachment.storagePath ? "Yes" : "No"}
+                  {message.createdAt.toLocaleString()}
                 </td>
-                <td className="px-6 py-4 text-center text-sm text-gray-300">
-                  <a
-                    href={attachment.storagePath}
-                    target="_blank"
-                    className="text-blue-400 hover:text-blue-300 hover:underline"
-                  >
-                    View
-                  </a>
-                </td>
-                {/* <td className="px-6 py-4 text-center text-sm text-gray-300">
-                  {!attachment.sourceUri ? (
-                    <SyncImageButton
-                      attachmentId={attachment.id}
-                      onClickAction={syncImage}
-                    />
-                  ) : null}
-                </td> */}
               </tr>
             ))}
           </tbody>

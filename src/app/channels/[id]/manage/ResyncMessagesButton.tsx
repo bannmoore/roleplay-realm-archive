@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { syncAllImages } from "./actions";
+import { resyncMessages } from "./actions";
 
-export default function SyncAllImagesButton({
+export default function ResyncMessagesButton({
   channelId,
 }: {
   channelId: string;
@@ -12,13 +12,13 @@ export default function SyncAllImagesButton({
 
   const handleClick = async () => {
     setIsSyncing(true);
-    await syncAllImages(channelId);
+    await resyncMessages(channelId);
     setIsSyncing(false);
   };
 
   return (
     <button type="button" onClick={handleClick} disabled={isSyncing}>
-      {isSyncing ? "Syncing..." : "Sync Images"}
+      {isSyncing ? "Syncing..." : "Sync"}
     </button>
   );
 }
