@@ -1,9 +1,9 @@
 "use server";
 
 import database from "@/clients/database";
-import discord, { DiscordMessageAttachment } from "@/clients/discord";
-import storage from "@/clients/storage";
+import discord from "@/clients/discord";
 import { revalidatePath } from "next/cache";
+import { syncImage } from "@/app/utils/discord-sync";
 
 export async function syncAllImages(channelId: string) {
   const channel = await database.getChannel(channelId);
@@ -35,12 +35,10 @@ export async function syncAllImages(channelId: string) {
         return;
       }
 
-      await syncImage({
-        discordAttachment,
-        serverId: channel.serverId,
-        channelId: channel.id,
-        messageId: message.id,
-        attachmentId: attachment.id,
+      const path = await syncImage(message.id, discordAttachment);
+
+      await database.updateAttachment(attachment.id, {
+        sourceUri: path,
       });
 
       await sleep(1000);
@@ -48,34 +46,6 @@ export async function syncAllImages(channelId: string) {
   }
 
   revalidatePath(`channels/${channelId}/manage`, "page");
-}
-
-export async function syncImage({
-  discordAttachment,
-  serverId,
-  channelId,
-  messageId,
-  attachmentId,
-}: {
-  discordAttachment: DiscordMessageAttachment;
-  serverId: string;
-  channelId: string;
-  messageId: string;
-  attachmentId: string;
-}) {
-  const img = await fetch(discordAttachment.url);
-  const buf = await img.arrayBuffer();
-  const uri = await storage.uploadMessageAttachment({
-    buf,
-    filename: attachmentId,
-    serverId: serverId,
-    channelId: channelId,
-    messageId: messageId,
-  });
-
-  await database.updateAttachment(attachmentId, {
-    sourceUri: uri,
-  });
 }
 
 function sleep(ms: number) {

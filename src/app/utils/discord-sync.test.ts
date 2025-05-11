@@ -16,9 +16,11 @@ import {
   fakeUserFromDiscordUser,
 } from "@/test/fakes/database";
 import { faker } from "@faker-js/faker";
+import storage from "@/clients/storage";
 
 vi.mock("@/clients/database");
 vi.mock("@/clients/discord");
+vi.mock("@/clients/storage");
 vi.mock("next/cache");
 
 describe("discord-sync", async () => {
@@ -209,7 +211,7 @@ describe("discord-sync", async () => {
           messageId: createdMessages[1].id,
           discordId: discordMessages[3].attachments[0].id,
           discordSourceUri: discordMessages[3].attachments[0].url,
-          sourceUri: null,
+          sourceUri: undefined,
           width: discordMessages[3].attachments[0].width,
           height: discordMessages[3].attachments[0].height,
         },
@@ -461,6 +463,26 @@ describe("discord-sync", async () => {
         ])
         .thenResolve([createdMessage]);
 
+      when(discord.downloadAttachment)
+        .calledWith(discordMessage.attachments[0])
+        .thenResolve(new ArrayBuffer(10));
+      when(discord.downloadAttachment)
+        .calledWith(discordMessage.attachments[1])
+        .thenResolve(new ArrayBuffer(10));
+
+      when(storage.uploadFile)
+        .calledWith({
+          buf: expect.any(ArrayBuffer),
+          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[0].filename}`,
+        })
+        .thenResolve("/uploaded-path-1/file.png");
+      when(storage.uploadFile)
+        .calledWith({
+          buf: expect.any(ArrayBuffer),
+          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[1].filename}`,
+        })
+        .thenResolve("/uploaded-path-2/file.png");
+
       await syncDiscordChannel(channel);
 
       expect(database.upsertMessagesAttachments).toHaveBeenCalledWith([
@@ -468,7 +490,7 @@ describe("discord-sync", async () => {
           messageId: createdMessage.id,
           discordId: discordMessage.attachments[0].id,
           discordSourceUri: discordMessage.attachments[0].url,
-          sourceUri: null,
+          sourceUri: "/uploaded-path-1/file.png",
           width: discordMessage.attachments[0].width,
           height: discordMessage.attachments[0].height,
         },
@@ -476,7 +498,7 @@ describe("discord-sync", async () => {
           messageId: createdMessage.id,
           discordId: discordMessage.attachments[1].id,
           discordSourceUri: discordMessage.attachments[1].url,
-          sourceUri: null,
+          sourceUri: "/uploaded-path-2/file.png",
           width: discordMessage.attachments[1].width,
           height: discordMessage.attachments[1].height,
         },

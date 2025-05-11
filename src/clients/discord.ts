@@ -77,6 +77,12 @@ class DiscordClient {
     return this.getWithBotAuth(qs);
   }
 
+  async downloadAttachment(discordAttachment: DiscordMessageAttachment) {
+    const response = await fetch(discordAttachment.url);
+    const buf = await response.arrayBuffer();
+    return buf;
+  }
+
   private async getWithUserAuth(path: string) {
     if (!userToken) {
       console.error("Discord Client: Unauthenticated");

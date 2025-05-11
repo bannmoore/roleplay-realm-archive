@@ -8,7 +8,11 @@ import database, {
   User,
 } from "@/clients/database";
 import discord from "@/clients/discord";
-import type { DiscordMessage } from "@/clients/discord";
+import type {
+  DiscordMessage,
+  DiscordMessageAttachment,
+} from "@/clients/discord";
+import storage from "@/clients/storage";
 
 export async function syncDiscordChannel(channel: Channel) {
   const authorUsers = await database.getServerUsers(channel.serverId);
@@ -119,28 +123,42 @@ async function syncMessageAttachments({
   discordMessages: DiscordMessage[];
   dbMessages: Message[];
 }) {
-  let attachments: Unsaved<MessageAttachment>[] = [];
+  const newAttachments: Unsaved<MessageAttachment>[] = [];
 
-  discordMessages.forEach((discordMessage) => {
+  for (const discordMessage of discordMessages) {
     const dbMessage = dbMessages.find((m) => m.discordId === discordMessage.id);
 
     if (dbMessage) {
-      attachments = attachments.concat(
-        discordMessage.attachments.map((attachment) => ({
+      for (const attachment of discordMessage.attachments) {
+        const path = await syncImage(dbMessage.id, attachment);
+
+        newAttachments.push({
           discordId: attachment.id,
           messageId: dbMessage.id,
           discordSourceUri: attachment.url,
-          sourceUri: null,
+          sourceUri: path,
           width: attachment.width ?? null,
           height: attachment.height ?? null,
-        }))
-      );
+        });
+      }
     }
-  });
-
-  if (attachments.length) {
-    await database.upsertMessagesAttachments(attachments);
   }
+
+  if (newAttachments.length) {
+    await database.upsertMessagesAttachments(newAttachments);
+  }
+}
+
+export async function syncImage(
+  messageId: string,
+  discordAttachment: DiscordMessageAttachment
+) {
+  const imageBuffer = await discord.downloadAttachment(discordAttachment);
+
+  return storage.uploadFile({
+    buf: imageBuffer,
+    path: `message-attachments/${messageId}/${discordAttachment.filename}`,
+  });
 }
 
 function sleep(ms: number) {

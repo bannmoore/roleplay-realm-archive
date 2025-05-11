@@ -31,21 +31,14 @@ class StorageClient {
     });
   }
 
-  async uploadMessageAttachment({
+  async uploadFile({
     buf,
-    filename,
-    serverId,
-    channelId,
-    messageId,
+    path,
   }: {
     buf: ArrayBuffer;
-    filename: string;
-    serverId: string;
-    channelId: string;
-    messageId: string;
+    path: string;
   }): Promise<string> {
     const fileContent = Buffer.from(buf);
-    const path = `message-attachments/server-${serverId}/channel-${channelId}/message-${messageId}/${filename}`;
 
     return new Promise((resolve, reject) =>
       this._s3Client.putObject(
@@ -78,6 +71,17 @@ class StorageClient {
       expiresIn: 60 * 60 * 24, // 30 days
     });
     return newUrl;
+  }
+
+  private _getMimeTypeExtension(mimeType: string) {
+    switch (mimeType) {
+      case "image/png":
+        return ".png";
+      case "image/jpeg":
+        return ".jpg";
+      default:
+        return "";
+    }
   }
 }
 
