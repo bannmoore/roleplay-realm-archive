@@ -210,8 +210,7 @@ describe("discord-sync", async () => {
         {
           messageId: createdMessages[1].id,
           discordId: discordMessages[3].attachments[0].id,
-          discordSourceUri: discordMessages[3].attachments[0].url,
-          sourceUri: undefined,
+          storagePath: undefined,
           width: discordMessages[3].attachments[0].width,
           height: discordMessages[3].attachments[0].height,
         },
@@ -489,16 +488,14 @@ describe("discord-sync", async () => {
         {
           messageId: createdMessage.id,
           discordId: discordMessage.attachments[0].id,
-          discordSourceUri: discordMessage.attachments[0].url,
-          sourceUri: "/uploaded-path-1/file.png",
+          storagePath: "/uploaded-path-1/file.png",
           width: discordMessage.attachments[0].width,
           height: discordMessage.attachments[0].height,
         },
         {
           messageId: createdMessage.id,
           discordId: discordMessage.attachments[1].id,
-          discordSourceUri: discordMessage.attachments[1].url,
-          sourceUri: "/uploaded-path-2/file.png",
+          storagePath: "/uploaded-path-2/file.png",
           width: discordMessage.attachments[1].width,
           height: discordMessage.attachments[1].height,
         },

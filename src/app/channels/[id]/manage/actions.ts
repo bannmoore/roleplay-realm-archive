@@ -38,7 +38,7 @@ export async function syncAllImages(channelId: string) {
       const path = await syncImage(message.id, discordAttachment);
 
       await database.updateAttachment(attachment.id, {
-        sourceUri: path,
+        storagePath: path,
       });
 
       await sleep(1000);

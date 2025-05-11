@@ -14,13 +14,13 @@ export default function Attachment({
 
   useEffect(() => {
     const fetchPresignedUrl = async () => {
-      if (attachment.sourceUri) {
-        const url = await getPresignedUrl(attachment.sourceUri);
+      if (attachment.storagePath) {
+        const url = await getPresignedUrl(attachment.storagePath);
         setImageUrl(url);
       }
     };
     fetchPresignedUrl();
-  }, [attachment.sourceUri]);
+  }, [attachment.storagePath]);
 
   if (!imageUrl) {
     return null;

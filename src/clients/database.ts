@@ -365,7 +365,7 @@ class DatabaseClient {
             .selectAll("messagesAttachments")
             .where(({ eb, ref }) =>
               eb("messages.id", "=", ref("messagesAttachments.messageId")).and(
-                "messagesAttachments.sourceUri",
+                "messagesAttachments.storagePath",
                 "is",
                 null
               )

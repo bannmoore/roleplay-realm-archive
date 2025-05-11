@@ -52,11 +52,11 @@ export default async function Page({
                   {attachment.id}
                 </td>
                 <td className="px-6 py-4 text-center text-sm text-gray-300">
-                  {attachment.sourceUri ? "Yes" : "No"}
+                  {attachment.storagePath ? "Yes" : "No"}
                 </td>
                 <td className="px-6 py-4 text-center text-sm text-gray-300">
                   <a
-                    href={attachment.sourceUri ?? attachment.discordSourceUri}
+                    href={attachment.storagePath}
                     target="_blank"
                     className="text-blue-400 hover:text-blue-300 hover:underline"
                   >

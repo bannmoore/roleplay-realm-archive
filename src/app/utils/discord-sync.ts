@@ -135,8 +135,7 @@ async function syncMessageAttachments({
         newAttachments.push({
           discordId: attachment.id,
           messageId: dbMessage.id,
-          discordSourceUri: attachment.url,
-          sourceUri: path,
+          storagePath: path,
           width: attachment.width ?? null,
           height: attachment.height ?? null,
         });
