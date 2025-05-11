@@ -41,6 +41,7 @@ export function fakeMessage(data: Partial<Message>) {
     updatedAt: faker.date.past(),
     isThread: false,
     threadId: null,
+    lastSyncedAt: null,
     ...data,
   });
 }

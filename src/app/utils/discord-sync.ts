@@ -1,12 +1,6 @@
 "use server";
 
-import database, {
-  Channel,
-  Message,
-  MessageAttachment,
-  Unsaved,
-  User,
-} from "@/clients/database";
+import database, { Channel, Message, Unsaved, User } from "@/clients/database";
 import discord from "@/clients/discord";
 import type {
   DiscordMessage,
@@ -123,12 +117,11 @@ async function syncMessageAttachments({
   discordMessages: DiscordMessage[];
   dbMessages: Message[];
 }) {
-  const newAttachments: Unsaved<MessageAttachment>[] = [];
-
   for (const discordMessage of discordMessages) {
     const dbMessage = dbMessages.find((m) => m.discordId === discordMessage.id);
 
     if (dbMessage) {
+      const newAttachments = [];
       for (const attachment of discordMessage.attachments) {
         const path = await syncImage(dbMessage.id, attachment);
 
@@ -140,11 +133,15 @@ async function syncMessageAttachments({
           height: attachment.height ?? null,
         });
       }
-    }
-  }
 
-  if (newAttachments.length) {
-    await database.upsertMessagesAttachments(newAttachments);
+      if (newAttachments.length) {
+        await database.upsertMessagesAttachments(newAttachments);
+      }
+
+      await database.updateMessage(dbMessage.id, {
+        lastSyncedAt: new Date(),
+      });
+    }
   }
 }
 
@@ -194,6 +191,7 @@ function zipMessagesAndAuthors({
             discordPublishedAt: new Date(message.timestamp),
             isThread: !!message.thread,
             threadId: threadOrigin?.id ?? null,
+            lastSyncedAt: null,
           },
         ]
       : [];
