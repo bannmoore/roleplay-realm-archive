@@ -456,6 +456,11 @@ class DatabaseClient {
       .insertInto("messagesAttachments")
       .values(messagesAttachments)
       .returningAll()
+      .onConflict((oc) =>
+        oc.column("discordId").doUpdateSet({
+          storagePath: (eb) => eb.ref("excluded.storagePath"),
+        })
+      )
       .execute();
   }
 
