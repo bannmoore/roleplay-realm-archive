@@ -3,6 +3,7 @@ import Discord from "next-auth/providers/discord";
 import { config } from "../config";
 import { Provider } from "next-auth/providers";
 import { jwtCallback, testCredentialsProvider } from "./credentials-provider";
+import discord from "@/clients/discord";
 
 const providers: Provider[] = [
   Discord({
@@ -49,6 +50,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = userId;
 
       return session;
+    },
+    async signIn({ user, account }) {
+      if (!account?.access_token) {
+        throw new Error("Unable to authenticate with Discord");
+      }
+      const discordCoreServerId = config.discordCoreServerId;
+
+      const guilds = await discord.getUserGuilds({
+        userToken: account.access_token,
+      });
+
+      if (!guilds.find((guild) => guild.id === discordCoreServerId)) {
+        console.error("Attempted invalid sign-in:", user);
+        throw new Error(
+          "Could not verify server membership. Please contact an admin."
+        );
+      }
+
+      return true;
     },
   },
 });

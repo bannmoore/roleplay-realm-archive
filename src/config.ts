@@ -7,6 +7,7 @@ export const config = {
   discordClientId: process.env.DISCORD_CLIENT_ID || "",
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET || "",
   discordState: process.env.DISCORD_STATE || "",
+  discordCoreServerId: process.env.DISCORD_CORE_SERVER_ID || "",
   env: process.env.NODE_ENV || "dev",
   doSpacesBucketName: process.env.DO_SPACES_BUCKET_NAME || "",
   doSpacesEndpoint: process.env.DO_SPACES_ENDPOINT || "",

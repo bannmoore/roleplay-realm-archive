@@ -19,6 +19,16 @@ class DiscordClient {
     userToken = token;
   }
 
+  async getUserGuilds({
+    userToken,
+  }: {
+    userToken: string;
+  }): Promise<DiscordGuild[]> {
+    return this.getWithUserAuth(`/users/@me/guilds`, {
+      userToken,
+    });
+  }
+
   async getGuild(id: string): Promise<DiscordGuild | null> {
     return this.getWithBotAuth(`/guilds/${id}`);
   }
@@ -83,12 +93,10 @@ class DiscordClient {
     return buf;
   }
 
-  private async getWithUserAuth(path: string) {
-    if (!userToken) {
-      console.error("Discord Client: Unauthenticated");
-      return null;
-    }
-
+  private async getWithUserAuth(
+    path: string,
+    { userToken }: { userToken: string }
+  ) {
     const response = await fetch(`${this._apiUrl}${path}`, {
       method: "get",
       headers: {
