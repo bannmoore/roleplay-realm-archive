@@ -40,6 +40,9 @@
     @apply bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg;
   }
 
+  .card-neutral {
+    @apply bg-darkpurple-900 bg-opacity-50 p-4 border border-darkpurple-800 shadow-sm rounded-sm;  }
+
   .message-content p {
     @apply mb-4
   }

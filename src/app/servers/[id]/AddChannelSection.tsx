@@ -17,14 +17,14 @@ export function AddChannelSection({
   }
 
   return (
-    <>
+    <div>
       <button type="button" onClick={toggleSection} className="mb-4">
-        Add Channel
+        {isVisible ? "Cancel" : "Add Channel"}
       </button>
 
       {isVisible && (
         <AddChannelForm serverDiscordId={serverDiscordId} serverId={serverId} />
       )}
-    </>
+    </div>
   );
 }

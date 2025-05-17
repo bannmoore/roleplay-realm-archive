@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import SyncChannelButton from "./SyncChannelButton";
 import MessageCard from "./MessageCard";
 import ExpandableMessageCard from "./ExpandableMessageCard";
-import Alert from "@/app/components/Alert";
+import Alert, { AlertInfo } from "@/app/components/Alert";
 import LoadMore from "./LoadMore";
 
 export default async function Page({
@@ -51,16 +51,32 @@ export default async function Page({
         <Alert />
       </div>
 
-      <div className="mt-4 text-left">
-        <LoadMore
-          loadMoreAction={loadMoreMessages}
-          channelId={channel.id}
-          initialOffset={2}
-          limit={2}
-        >
-          <MessagesList messages={messages} />
-        </LoadMore>
-      </div>
+      {messages.length ? (
+        <div className="mt-4 text-left">
+          <LoadMore
+            loadMoreAction={loadMoreMessages}
+            channelId={channel.id}
+            initialOffset={2}
+            limit={2}
+          >
+            <MessagesList messages={messages} />
+          </LoadMore>
+        </div>
+      ) : (
+        <div className="mt-8 text-left mx-auto w-8/12">
+          <AlertInfo>
+            <div className="text-center flex flex-col gap-2">
+              <p>No messages found. Please press Sync.</p>
+              <p>
+                Note: If this is an older channel in Discord, the Sync operation
+                could take a long time. The operation can be restarted if
+                interrupted, but it is not ideal.
+              </p>
+              <p>Contact an admin if you run into any trouble.</p>
+            </div>
+          </AlertInfo>
+        </div>
+      )}
     </div>
   );
 }

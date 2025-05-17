@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { AddChannelSection } from "./AddChannelSection";
 import Link from "next/link";
+import Alert from "@/app/components/Alert";
 
 export default async function Page({
   params,
@@ -21,7 +22,12 @@ export default async function Page({
   return (
     <>
       <div className="mb-4">
-        <h1 className="mb-4">{server.name}</h1>
+        <div className="flex items-center gap-2">
+          <h1>{server.name}</h1>
+          <Link href={`/`} className="link">
+            Back
+          </Link>
+        </div>
         <Image
           className="rounded-full mx-auto"
           src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.iconHash}.png`}
@@ -29,6 +35,10 @@ export default async function Page({
           width={100}
           height={100}
         />
+      </div>
+
+      <div className="my-4">
+        <Alert />
       </div>
 
       <AddChannelSection

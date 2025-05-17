@@ -11,6 +11,7 @@ export default {
       // https://coolors.co/000505-3b3355-5d5d81-bfcde0-fefcfd
       colors: {
         black: "#000505",
+        lightblack: "#000A0A",
         white: "#FEFCFD",
         darkpurple: {
           100: "#5A5889",
