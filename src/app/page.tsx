@@ -21,7 +21,7 @@ export default async function HomePage() {
         <h1>Servers</h1>
         <div className="inline-block ml-4">
           <Link href="/help/about-the-bot" className="link mr-4">
-            What&apos;s this?
+            Why isn&apos;t my server here?
           </Link>
           <SyncServersButton />
         </div>
