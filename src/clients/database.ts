@@ -226,11 +226,28 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
-  async getChannels(serverId: string): Promise<Channel[]> {
+  async getChannels({
+    serverId,
+    userId,
+  }: {
+    serverId: string;
+    userId: string;
+  }): Promise<Channel[]> {
     return this._db
       .selectFrom("channels")
-      .selectAll()
+      .selectAll("channels")
       .where("serverId", "=", serverId)
+      .where(({ exists, selectFrom }) =>
+        exists(
+          selectFrom("messages")
+            .select("id")
+            .where(({ eb, ref }) =>
+              eb("messages.channelId", "=", ref("channels.id")).and(
+                eb("messages.authorId", "=", userId)
+              )
+            )
+        )
+      )
       .execute();
   }
 

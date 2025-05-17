@@ -4,12 +4,18 @@ import Image from "next/image";
 import { AddChannelSection } from "./AddChannelSection";
 import Link from "next/link";
 import Alert from "@/app/components/Alert";
+import { checkAuthenticated } from "@/util";
 
 export default async function Page({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await checkAuthenticated();
+
+  if (!user) {
+    return notFound();
+  }
   const id = (await params).id;
   const server = await database.getServer(id);
 
@@ -17,7 +23,10 @@ export default async function Page({
     return notFound();
   }
 
-  const channels = await database.getChannels(server.id);
+  const channels = await database.getChannels({
+    serverId: server.id,
+    userId: user.id,
+  });
 
   return (
     <>
