@@ -5,8 +5,10 @@ import { resyncMessages } from "./actions";
 
 export default function ResyncMessagesButton({
   channelId,
+  disabled,
 }: {
   channelId: string;
+  disabled: boolean;
 }) {
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -17,7 +19,11 @@ export default function ResyncMessagesButton({
   };
 
   return (
-    <button type="button" onClick={handleClick} disabled={isSyncing}>
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isSyncing || disabled}
+    >
       {isSyncing ? "Syncing..." : "Sync"}
     </button>
   );
