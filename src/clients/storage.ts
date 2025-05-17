@@ -39,12 +39,13 @@ class StorageClient {
     path: string;
   }): Promise<string> {
     const fileContent = Buffer.from(buf);
+    const pathWithEnv = config.env === "development" ? `DEV-${path}` : path;
 
     return new Promise((resolve, reject) =>
       this._s3Client.putObject(
         {
           Bucket: this._bucketName,
-          Key: path,
+          Key: pathWithEnv,
           Body: fileContent,
         },
         (err, _data) => {
@@ -52,17 +53,13 @@ class StorageClient {
             reject(err);
           }
 
-          resolve(path);
+          resolve(pathWithEnv);
         }
       )
     );
   }
 
-  async getPresignedUrl(url: string) {
-    const path = url.replaceAll(
-      "https://roleplay-realm-archive-storage.sfo3.digitaloceanspaces.com/",
-      ""
-    );
+  async getPresignedUrl(path: string) {
     const command = new GetObjectCommand({
       Bucket: this._bucketName,
       Key: path,
