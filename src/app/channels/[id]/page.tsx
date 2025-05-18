@@ -35,9 +35,11 @@ export default async function Page({
         </div>
         <div className="flex items-center">
           Last synced:{" "}
-          {channel.lastSyncedAt
-            ? channel.lastSyncedAt.toLocaleString()
-            : "Never"}
+          <span suppressHydrationWarning>
+            {channel.lastSyncedAt
+              ? channel.lastSyncedAt.toLocaleString()
+              : "Never"}
+          </span>
           <div className="ml-4 flex gap-2">
             <SyncChannelButton channel={channel} />
             <Link href={`/channels/${channel.id}/manage`} className="button">

@@ -39,7 +39,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
       <div className="card" onClick={handleClick}>
         <div className="flex mb-2">
           <span className="flex-1">{message.authorUsername}</span>
-          <span>
+          <span suppressHydrationWarning>
             {message.discordPublishedAt.toDateString()}{" "}
             {message.discordPublishedAt.toLocaleTimeString()}
           </span>

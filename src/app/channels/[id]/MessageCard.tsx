@@ -10,7 +10,7 @@ export default function MessageCard({ message }: MessageCardProps) {
     <div className="mb-4 card">
       <div className="flex mb-2">
         <span className="flex-1">{message.authorUsername}</span>
-        <span>
+        <span suppressHydrationWarning>
           {message.discordPublishedAt.toDateString()}{" "}
           {message.discordPublishedAt.toLocaleTimeString()}
         </span>
