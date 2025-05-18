@@ -2,7 +2,6 @@
 
 import { MessageAttachment } from "@/clients/database";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { getPresignedUrl } from "./actions";
 
 export default function Attachment({
@@ -14,10 +13,8 @@ export default function Attachment({
 
   useEffect(() => {
     const fetchPresignedUrl = async () => {
-      if (attachment.storagePath) {
-        const url = await getPresignedUrl(attachment.storagePath);
-        setImageUrl(url);
-      }
+      const url = await getPresignedUrl(attachment.storagePath);
+      setImageUrl(url);
     };
     fetchPresignedUrl();
   }, [attachment.storagePath]);
@@ -26,13 +23,25 @@ export default function Attachment({
     return null;
   }
 
+  // Ref: Next Image does not seem to function correctly in DO
+  // https://github.com/vercel/next.js/discussions/34433
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src={imageUrl}
       alt="Attachment"
       width={attachment.width ?? 500}
       height={attachment.height ?? 500}
       className="m-auto"
+      onError={(e) => console.error("Failed to load attachment", e)}
     />
+    // <Image
+    //   src={imageUrl}
+    //   alt="Attachment"
+    //   width={attachment.width ?? 500}
+    //   height={attachment.height ?? 500}
+    //   className="m-auto"
+    //   onError={(e) => console.error("Failed to load attachment", e)}
+    // />
   );
 }
