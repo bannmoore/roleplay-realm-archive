@@ -84,12 +84,20 @@ class DiscordClient {
 
   async getThreadMessages(
     parentMessageId: string,
-    { beforeId }: { beforeId?: string } = {}
+    { beforeId, afterId }: { beforeId?: string; afterId?: string } = {}
   ): Promise<DiscordMessage[]> {
     let qs = `/channels/${parentMessageId}/messages?limit=100`;
 
+    if (beforeId && afterId) {
+      throw new Error("Cannot use both beforeId and afterId");
+    }
+
     if (beforeId) {
       qs = `${qs}&before=${beforeId}`;
+    }
+
+    if (afterId) {
+      qs = `${qs}&after=${afterId}`;
     }
 
     return this.getWithBotAuth(qs);

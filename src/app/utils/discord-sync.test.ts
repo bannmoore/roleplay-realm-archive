@@ -421,7 +421,7 @@ describe("discord-sync", async () => {
       });
     });
 
-    test("syncs thread messages through channel sync", async () => {
+    test("syncs all thread messages through channel sync", async () => {
       const fakeDate = faker.date.past();
       vi.setSystemTime(fakeDate);
 
@@ -531,6 +531,130 @@ describe("discord-sync", async () => {
       await syncDiscordChannel(channel);
 
       expect(database.upsertMessages).toHaveBeenCalledTimes(2);
+
+      expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
+        lastSyncedAt: new Date(fakeDate.getTime() + 1000),
+      });
+    });
+
+    test("syncs new thread messages through channel sync", async () => {
+      const fakeDate = faker.date.past();
+      vi.setSystemTime(fakeDate);
+
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordThreadMessages = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+      ];
+
+      const users = discordUsers.map(fakeUserFromDiscordUser);
+      const channel = fakeChannel();
+
+      const existingMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+          isThread: true,
+        }),
+      ];
+
+      const existingThreadMessages = [
+        fakeMessage({
+          authorId: users[1].id,
+          threadId: existingMessages[0].id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+          threadId: existingMessages[0].id,
+        }),
+      ];
+
+      const createdThreadMessages = [
+        fakeMessage({
+          authorId: users[1].id,
+          discordId: discordThreadMessages[0].id,
+          threadId: existingMessages[0].id,
+        }),
+      ];
+
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          beforeId: existingMessages[0].discordId,
+        })
+        .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: existingMessages[0].discordId,
+        })
+        .thenResolve(discordThreadMessages);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: discordThreadMessages[0].id,
+        })
+        .thenResolve([]);
+
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          beforeId: existingThreadMessages[0].discordId,
+        })
+        .thenResolve([]);
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          afterId: existingThreadMessages[1].discordId,
+        })
+        .thenResolve(discordThreadMessages);
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          afterId: createdThreadMessages[0].discordId,
+        })
+        .thenResolve([]);
+
+      when(database.getServerUsers)
+        .calledWith(channel.serverId)
+        .thenResolve(users);
+      when(database.getOldestMessage)
+        .calledWith(channel.id)
+        .thenResolve(existingMessages[0]);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(existingMessages[0]);
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve(existingMessages);
+
+      when(database.getOldestThreadMessage)
+        .calledWith(existingMessages[0].id)
+        .thenResolve(existingThreadMessages[0]);
+      when(database.getNewestThreadMessage)
+        .calledWith(existingMessages[0].id)
+        .thenResolve(existingThreadMessages[1]);
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          beforeId: existingThreadMessages[0].discordId,
+        })
+        .thenResolve([]);
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          afterId: existingThreadMessages[1].discordId,
+        })
+        .thenResolve(discordThreadMessages);
+      when(discord.getThreadMessages)
+        .calledWith(existingMessages[0].discordId, {
+          afterId: createdThreadMessages[0].discordId,
+        })
+        .thenResolve([]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
+            discordId: discordThreadMessages[0].id,
+          }),
+        ])
+        .thenResolve(createdThreadMessages);
+
+      await syncDiscordChannel(channel);
+
+      expect(database.upsertMessages).toHaveBeenCalledTimes(1);
 
       expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
         lastSyncedAt: new Date(fakeDate.getTime() + 1000),

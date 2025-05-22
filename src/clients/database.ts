@@ -395,6 +395,16 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
+  async getNewestThreadMessage(threadId: string): Promise<Message | undefined> {
+    return this._db
+      .selectFrom("messages")
+      .selectAll()
+      .where("threadId", "=", threadId)
+      .orderBy("discordPublishedAt", "desc")
+      .limit(1)
+      .executeTakeFirst();
+  }
+
   async getUnsyncedMessages(channelId: string) {
     return this._db
       .selectFrom("messages")

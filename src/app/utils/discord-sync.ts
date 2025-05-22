@@ -136,9 +136,9 @@ async function syncDiscordMessageThread({
     threadOrigin.id
   );
   let oldestThreadMessageId = oldestThreadMessage?.discordId;
-  let isSyncingThreads = true;
+  let isSyncingThreadsOld = true;
 
-  while (isSyncingThreads) {
+  while (isSyncingThreadsOld) {
     const newDiscordThreadMessages = await discord.getThreadMessages(
       threadOrigin.discordId,
       {
@@ -147,7 +147,7 @@ async function syncDiscordMessageThread({
     );
 
     if (!newDiscordThreadMessages.length) {
-      isSyncingThreads = false;
+      isSyncingThreadsOld = false;
       break;
     }
 
@@ -184,6 +184,61 @@ async function syncDiscordMessageThread({
     await sleep(1000);
 
     oldestThreadMessageId =
+      newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
+  }
+
+  const newestThreadMessage = await database.getNewestThreadMessage(
+    threadOrigin.id
+  );
+  let newestThreadMessageId = newestThreadMessage?.discordId;
+  let isSyncingThreadsNew = true;
+
+  while (isSyncingThreadsNew) {
+    const newDiscordThreadMessages = await discord.getThreadMessages(
+      threadOrigin.discordId,
+      {
+        afterId: newestThreadMessageId,
+      }
+    );
+
+    if (!newDiscordThreadMessages.length) {
+      isSyncingThreadsNew = false;
+      break;
+    }
+
+    const newUnsavedThreadMessages = zipMessagesAndAuthors({
+      channelId: threadOrigin.channelId,
+      users: authorUsers,
+      messages: newDiscordThreadMessages,
+      threadOrigin,
+    });
+
+    if (!newUnsavedThreadMessages.length) {
+      continue;
+    }
+
+    const createdThreadMessages = await database.upsertMessages(
+      newUnsavedThreadMessages
+    );
+
+    for (const discordMessage of newDiscordThreadMessages) {
+      const dbMessage = createdThreadMessages.find(
+        (m) => m.discordId === discordMessage.id
+      );
+
+      if (!dbMessage) {
+        continue;
+      }
+
+      await syncMessageAttachments({
+        discordMessage,
+        dbMessage,
+      });
+    }
+
+    await sleep(1000);
+
+    newestThreadMessageId =
       newUnsavedThreadMessages[newUnsavedThreadMessages.length - 1].discordId;
   }
 }
