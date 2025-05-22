@@ -11,17 +11,19 @@ import storage from "@/clients/storage";
 export async function syncDiscordChannel(channel: Channel) {
   const authorUsers = await database.getServerUsers(channel.serverId);
 
+  /* OLD MESSAGES */
+
   const oldestMessage = await database.getOldestMessage(channel.id);
   let oldestMessageId = oldestMessage?.discordId;
-  let isSyncing = true;
+  let isSyncingOld = true;
 
-  while (isSyncing) {
+  while (isSyncingOld) {
     const newDiscordMessages = await discord.getMessages(channel.discordId, {
       beforeId: oldestMessageId,
     });
 
     if (!newDiscordMessages.length) {
-      isSyncing = false;
+      isSyncingOld = false;
       break;
     }
 
@@ -57,6 +59,57 @@ export async function syncDiscordChannel(channel: Channel) {
 
     await sleep(1000);
   }
+
+  /* NEW MESSAGES */
+
+  const newestMessage = await database.getNewestMessage(channel.id);
+  let newestMessageId = newestMessage?.discordId;
+  let isSyncingNew = true;
+
+  while (isSyncingNew) {
+    const newDiscordMessages = await discord.getMessages(channel.discordId, {
+      afterId: newestMessageId,
+    });
+
+    if (!newDiscordMessages.length) {
+      isSyncingNew = false;
+      break;
+    }
+
+    const newUnsavedMessages = zipMessagesAndAuthors({
+      channelId: channel.id,
+      users: authorUsers,
+      messages: newDiscordMessages,
+    });
+
+    if (!newUnsavedMessages.length) {
+      continue;
+    }
+
+    const createdMessages = await database.upsertMessages(newUnsavedMessages);
+
+    for (const discordMessage of newDiscordMessages) {
+      const dbMessage = createdMessages.find(
+        (m) => m.discordId === discordMessage.id
+      );
+
+      if (!dbMessage) {
+        continue;
+      }
+
+      await syncMessageAttachments({
+        discordMessage,
+        dbMessage,
+      });
+    }
+
+    newestMessageId =
+      newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
+
+    await sleep(1000);
+  }
+
+  /* THREADS */
 
   const threadOrigins = await database.getThreadOriginMessages(channel.id);
 

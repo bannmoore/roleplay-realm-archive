@@ -343,6 +343,24 @@ class DatabaseClient {
       .executeTakeFirst();
   }
 
+  async getNewestMessage(channelId: string): Promise<Message | undefined> {
+    return this._db
+      .selectFrom("messages")
+      .innerJoin("users", "messages.authorId", "users.id")
+      .selectAll("messages")
+      .select(["users.discordUsername"])
+      .where((eb) =>
+        eb("messages.channelId", "=", channelId).and(
+          "messages.threadId",
+          "is",
+          null
+        )
+      )
+      .orderBy("discordPublishedAt desc")
+      .limit(1)
+      .executeTakeFirst();
+  }
+
   async getThreadOriginMessages(channelId: string): Promise<Message[]> {
     return this._db
       .selectFrom("messages")

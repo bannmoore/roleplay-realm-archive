@@ -63,7 +63,7 @@ describe("discord-sync", async () => {
       });
     });
 
-    test("upserts new messages", async () => {
+    test("upserts all messages on new channel", async () => {
       const fakeDate = faker.date.past();
       vi.setSystemTime(fakeDate);
 
@@ -80,18 +80,37 @@ describe("discord-sync", async () => {
       const channel = fakeChannel();
       const users = discordUsers.map(fakeUserFromDiscordUser);
 
+      const createdMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+          discordId: discordMessages[0].id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+          discordId: discordMessages[1].id,
+        }),
+      ];
+
       when(database.getServerUsers)
         .calledWith(channel.serverId)
         .thenResolve(users);
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(createdMessages[1]);
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
         .thenResolve(discordMessages);
       when(discord.getMessages)
         .calledWith(channel.discordId, {
           beforeId: discordMessages[discordMessages.length - 1].id,
+        })
+        .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessages[1].discordId,
         })
         .thenResolve([]);
 
@@ -104,16 +123,93 @@ describe("discord-sync", async () => {
             discordId: discordMessages[1].id,
           }),
         ])
-        .thenResolve([
-          fakeMessage({
-            authorId: users[0].id,
+        .thenResolve(createdMessages);
+
+      when(database.getThreadOriginMessages)
+        .calledWith(channel.id)
+        .thenResolve([]);
+
+      await syncDiscordChannel(channel);
+
+      expect(database.upsertMessages).toHaveBeenCalledTimes(1);
+
+      expect(database.updateChannel).toHaveBeenCalledWith(channel.id, {
+        lastSyncedAt: new Date(fakeDate.getTime() + 1000),
+      });
+    });
+
+    test("upserts new messages on existing channel", async () => {
+      const fakeDate = faker.date.past();
+      vi.setSystemTime(fakeDate);
+
+      const discordUsers = fakeArray(2, fakeDiscordUser);
+      const discordMessages = [
+        fakeDiscordMessage({
+          author: discordUsers[0],
+        }),
+        fakeDiscordMessage({
+          author: discordUsers[1],
+        }),
+      ];
+
+      const channel = fakeChannel();
+      const users = discordUsers.map(fakeUserFromDiscordUser);
+
+      const existingMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+        }),
+      ];
+
+      const createdMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+          discordId: discordMessages[0].id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+          discordId: discordMessages[1].id,
+        }),
+      ];
+
+      when(database.getServerUsers)
+        .calledWith(channel.serverId)
+        .thenResolve(users);
+      when(database.getOldestMessage)
+        .calledWith(channel.id)
+        .thenResolve(existingMessages[0]);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(existingMessages[1]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          beforeId: existingMessages[0].discordId,
+        })
+        .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: existingMessages[1].discordId,
+        })
+        .thenResolve(discordMessages);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessages[1].discordId,
+        })
+        .thenResolve([]);
+
+      when(database.upsertMessages)
+        .calledWith([
+          expect.objectContaining({
             discordId: discordMessages[0].id,
           }),
-          fakeMessage({
-            authorId: users[1].id,
+          expect.objectContaining({
             discordId: discordMessages[1].id,
           }),
-        ]);
+        ])
+        .thenResolve(createdMessages);
 
       when(database.getThreadOriginMessages)
         .calledWith(channel.id)
@@ -178,6 +274,9 @@ describe("discord-sync", async () => {
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(createdMessages[1]);
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
         .thenResolve(discordMessages);
@@ -186,7 +285,11 @@ describe("discord-sync", async () => {
           beforeId: discordMessages[3].id,
         })
         .thenResolve([]);
-
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessages[1].discordId,
+        })
+        .thenResolve([]);
       when(database.upsertMessages)
         .calledWith([
           expect.objectContaining({
@@ -243,12 +346,30 @@ describe("discord-sync", async () => {
       const channel = fakeChannel();
       const users = discordUsers.map(fakeUserFromDiscordUser);
 
+      const createdMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+          discordId: discordMessagesLoop1[0].id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+          discordId: discordMessagesLoop1[1].id,
+        }),
+        fakeMessage({
+          authorId: users[0].id,
+          discordId: discordMessagesLoop2[0].id,
+        }),
+      ];
+
       when(database.getServerUsers)
         .calledWith(channel.serverId)
         .thenResolve(users);
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(createdMessages[2]);
       when(database.getThreadOriginMessages)
         .calledWith(channel.id)
         .thenResolve([]);
@@ -266,6 +387,11 @@ describe("discord-sync", async () => {
           beforeId: discordMessagesLoop2[discordMessagesLoop2.length - 1].id,
         })
         .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessages[2].discordId,
+        })
+        .thenResolve([]);
 
       when(database.upsertMessages)
         .calledWith([
@@ -276,16 +402,7 @@ describe("discord-sync", async () => {
             discordId: discordMessagesLoop1[1].id,
           }),
         ])
-        .thenResolve([
-          fakeMessage({
-            authorId: users[0].id,
-            discordId: discordMessagesLoop1[0].id,
-          }),
-          fakeMessage({
-            authorId: users[1].id,
-            discordId: discordMessagesLoop1[1].id,
-          }),
-        ]);
+        .thenResolve([createdMessages[0], createdMessages[1]]);
 
       when(database.upsertMessages)
         .calledWith([
@@ -293,12 +410,7 @@ describe("discord-sync", async () => {
             discordId: discordMessagesLoop2[0].id,
           }),
         ])
-        .thenResolve([
-          fakeMessage({
-            authorId: users[0].id,
-            discordId: discordMessagesLoop2[0].id,
-          }),
-        ]);
+        .thenResolve([createdMessages[2]]);
 
       await syncDiscordChannel(channel);
 
@@ -336,6 +448,19 @@ describe("discord-sync", async () => {
         discordId: discordThreadMessages[0].id,
       });
 
+      const createdMessages = [
+        fakeMessage({
+          authorId: users[0].id,
+          discordId: discordChannelMessages[0].id,
+          threadId: createdThreadOrigin.id,
+        }),
+        fakeMessage({
+          authorId: users[1].id,
+          discordId: discordChannelMessages[1].id,
+          threadId: createdThreadOrigin.id,
+        }),
+      ];
+
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
         .thenResolve(discordChannelMessages);
@@ -343,6 +468,11 @@ describe("discord-sync", async () => {
         .calledWith(channel.discordId, {
           beforeId:
             discordChannelMessages[discordChannelMessages.length - 1].id,
+        })
+        .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessages[1].discordId,
         })
         .thenResolve([]);
 
@@ -356,6 +486,9 @@ describe("discord-sync", async () => {
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(createdMessages[1]);
       when(database.getThreadOriginMessages)
         .calledWith(channel.id)
         .thenResolve([createdThreadOrigin]);
@@ -378,18 +511,7 @@ describe("discord-sync", async () => {
             discordId: discordChannelMessages[1].id,
           }),
         ])
-        .thenResolve([
-          fakeMessage({
-            authorId: users[0].id,
-            discordId: discordChannelMessages[0].id,
-            threadId: createdThreadOrigin.id,
-          }),
-          fakeMessage({
-            authorId: users[1].id,
-            discordId: discordChannelMessages[1].id,
-            threadId: createdThreadOrigin.id,
-          }),
-        ]);
+        .thenResolve(createdMessages);
 
       when(database.upsertMessages)
         .calledWith([
@@ -442,12 +564,20 @@ describe("discord-sync", async () => {
       when(database.getOldestMessage)
         .calledWith(channel.id)
         .thenResolve(undefined);
+      when(database.getNewestMessage)
+        .calledWith(channel.id)
+        .thenResolve(createdMessage);
       when(discord.getMessages)
         .calledWith(channel.discordId, { beforeId: undefined })
         .thenResolve([discordMessage]);
       when(discord.getMessages)
         .calledWith(channel.discordId, {
           beforeId: discordMessage.id,
+        })
+        .thenResolve([]);
+      when(discord.getMessages)
+        .calledWith(channel.discordId, {
+          afterId: createdMessage.discordId,
         })
         .thenResolve([]);
       when(database.getThreadOriginMessages)
