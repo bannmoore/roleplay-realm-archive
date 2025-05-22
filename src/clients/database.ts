@@ -264,8 +264,12 @@ class DatabaseClient {
       )
       .selectFrom("inserted")
       .selectAll()
-      .union(this._db.selectFrom("channels").selectAll())
-      .where("discordId", "=", channel.discordId)
+      .union(
+        this._db
+          .selectFrom("channels")
+          .selectAll()
+          .where("discordId", "=", channel.discordId)
+      )
       .executeTakeFirstOrThrow();
   }
 
@@ -328,7 +332,11 @@ class DatabaseClient {
       .selectAll("messages")
       .select(["users.discordUsername"])
       .where((eb) =>
-        eb("channelId", "=", channelId).and("threadId", "is", null)
+        eb("messages.channelId", "=", channelId).and(
+          "messages.threadId",
+          "is",
+          null
+        )
       )
       .orderBy("discordPublishedAt asc")
       .limit(1)
