@@ -5,7 +5,7 @@ IFS=$'\n\t'
 source "$(dirname "${BASH_SOURCE[0]}")/../_shared.sh"
 
 DUMP_SCRIPT_FILENAME=dump.sh
-DUMP_FILENAME=cas_db.dump
+DUMP_FILENAME=rra_db.dump
 
 # create dump script
 cat >./$DUMP_SCRIPT_FILENAME <<EOL
