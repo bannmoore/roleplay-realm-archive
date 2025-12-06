@@ -7,7 +7,7 @@ resource "digitalocean_ssh_key" "rra_jump_server_ssh_key" {
 # https://registry.terraform.io/providers/digitalocean/digitalocean/latest/docs/resources/droplet
 resource "digitalocean_droplet" "rra_jump_server" {
   name     = "rra-jump-server"
-  image    = "ubuntu-24-10-x64"
+  image    = "ubuntu-25-04-x64" # https://docs.digitalocean.com/products/droplets/details/images/
   region   = var.do_region
   size     = "s-1vcpu-512mb-10gb"
   ssh_keys = [digitalocean_ssh_key.rra_jump_server_ssh_key.fingerprint]
