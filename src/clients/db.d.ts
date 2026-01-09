@@ -70,6 +70,11 @@ export interface Sessions {
   userId: Int8 | null;
 }
 
+export interface Universes {
+  id: Generated<Int8>;
+  name: string;
+}
+
 export interface Users {
   createdAt: Generated<Timestamp>;
   discordId: string;
@@ -86,5 +91,6 @@ export interface DB {
   servers: Servers;
   serversUsers: ServersUsers;
   sessions: Sessions;
+  universes: Universes;
   users: Users;
 }

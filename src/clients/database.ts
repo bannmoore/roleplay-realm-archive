@@ -11,6 +11,7 @@ import {
   Messages,
   MessagesAttachments,
   Servers,
+  Universes,
   Users,
 } from "./db";
 import { Pool } from "pg";
@@ -19,6 +20,7 @@ import { config } from "@/config";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 
 export type User = Selectable<Users>;
+export type Universe = Selectable<Universes>;
 export type Server = Selectable<Servers>;
 export type Channel = Selectable<Channels>;
 export type Message = Selectable<Messages>;
@@ -142,6 +144,29 @@ class DatabaseClient {
       .selectAll()
       .union(this._db.selectFrom("users").selectAll().where("id", "in", ids))
       .execute();
+  }
+
+  async getUniverses(): Promise<Universe[]> {
+    return this._db.selectFrom("universes").selectAll("universes").execute();
+  }
+
+  async insertUniverse(name: string): Promise<Universe> {
+    return this._db
+      .with("inserted", (db) =>
+        db
+          .insertInto("universes")
+          .columns(["name"])
+          .values({
+            name,
+          })
+          .returningAll()
+      )
+      .selectFrom("inserted")
+      .selectAll()
+      .union(
+        this._db.selectFrom("universes").selectAll().where("name", "=", name)
+      )
+      .executeTakeFirstOrThrow();
   }
 
   async getServer(id: string): Promise<Server | undefined> {

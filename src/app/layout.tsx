@@ -34,7 +34,16 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <header className="container m-auto flex p-4 items-center">
-          <Link href="/">Roleplay Realm Archive</Link>
+          <Link href="/" className="text-lg">
+            Roleplay Realm Archive
+          </Link>
+          <nav className="ml-6">
+            {user?.isAdmin && (
+              <Link href="/admin" className="mr-4">
+                Admin
+              </Link>
+            )}
+          </nav>
           <div className="flex-1">
             {user && (
               <div className="flex items-center justify-end gap-4">
