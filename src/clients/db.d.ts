@@ -75,6 +75,7 @@ export interface Users {
   discordId: string;
   discordUsername: string;
   id: Generated<Int8>;
+  isAdmin: Generated<boolean>;
   updatedAt: Generated<Timestamp>;
 }
 

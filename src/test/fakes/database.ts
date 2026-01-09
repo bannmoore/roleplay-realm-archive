@@ -16,6 +16,7 @@ export function fakeUser() {
     discordUsername: faker.internet.username(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
+    isAdmin: false,
   });
 }
 
@@ -26,6 +27,7 @@ export function fakeUserFromDiscordUser(discordUser: DiscordUser) {
     discordUsername: discordUser.username,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
+    isAdmin: false,
   });
 }
 

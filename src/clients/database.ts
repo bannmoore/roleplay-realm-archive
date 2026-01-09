@@ -29,7 +29,7 @@ export type MessageWithDisplayData = Message & {
   attachments: MessageAttachment[];
 };
 
-export type Unsaved<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
+export type Unsaved<T> = Omit<T, "id" | "createdAt" | "updatedAt" | "isAdmin">;
 
 class DatabaseClient {
   private _db: Kysely<DB>;
@@ -128,6 +128,7 @@ class DatabaseClient {
             users.map((user) => ({
               discordId: user.discordId,
               discordUsername: user.discordUsername,
+              isAdmin: false,
             }))
           )
           .onConflict((oc) =>
