@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn, signOut } from "@/auth";
 import { checkAuthenticated } from "@/util";
 import { AlertProvider } from "./components/AlertContext";
+import { config } from "@/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Roleplay Realm Archive",
+  title:
+    "Roleplay Realm Archive" + (config.env === "development" ? " [DEV]" : ""),
   description: "",
 };
 
