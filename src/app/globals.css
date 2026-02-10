@@ -1,15 +1,66 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* https://coolors.co/000505-3b3355-5d5d81-bfcde0-fefcfd */
+
+  --color-black: #000505;
+  --color-lightblack: #000a0a;
+  --color-white: #fefcfd;
+
+  --color-darkpurple-100: #5a5889;
+  --color-darkpurple-200: #52507c;
+  --color-darkpurple-300: #4a4870;
+  --color-darkpurple-400: #424064;
+  --color-darkpurple-500: #3a3857;
+  --color-darkpurple-600: #32304b;
+  --color-darkpurple-700: #3b3355; /* space cadet */
+  --color-darkpurple-800: #222032;
+  --color-darkpurple-900: #191825;
+
+  --color-lightpurple-100: #adadc2;
+  --color-lightpurple-200: #a1a1ba;
+  --color-lightpurple-300: #9595b1;
+  --color-lightpurple-400: #8a8aa8;
+  --color-lightpurple-700: #5d5d81; /* ultra violet */
+
+  --color-blue-100: #f1f4f8;
+  --color-blue-200: #bfcde0; /* columbia blue */
+  --color-blue-300: #9fb3d1;
+  --color-blue-400: #7592bd;
+  --color-blue-500: #5072a5;
+  --color-blue-600: #3c557c;
+  --color-blue-700: #283853;
+  --color-blue-800: #141c29;
+
+  --color-error-300: #ffd6d8;
+  --color-error-400: #ff999c;
+  --color-error-500: #ff5c64; /* bittersweet */
+  --color-error-600: #ff1f2a;
+  --color-error-700: #e0000b;
+  --color-error-800: #a30008;
+  --color-error-900: #660005;
+
+  /* https://coolors.co/000505-3b3355-5d5d81-bfcde0-66a182 */
+  --color-success-100: #f2f7f5;
+  --color-success-200: #d9e8e0;
+  --color-success-300: #b3d0c1;
+  --color-success-400: #8db9a2;
+  --color-success-500: #66a182; /* zomp */
+  --color-success-600: #4e7e64;
+  --color-success-700: #365946;
+  --color-success-800: #1f3328;
+  --color-success-900: #101914;
+}
 
 @layer base {
   body {
-    color: #FEFCFD;
+    color: #fefcfd;
     background: #000505;
     font-family: Arial, Helvetica, sans-serif;
   }
 
-  button, a.button {
+  button,
+  a.button {
     @apply bg-darkpurple-700 text-white font-bold py-2 px-4 rounded;
   }
 
@@ -18,13 +69,13 @@
   }
 
   a.link {
-    color: #BFCDE0;
+    color: #bfcde0;
     /* Columbia Blue */
     text-decoration: underline;
   }
 
   a.link:hover {
-    color: #9FB3D1;
+    color: #9fb3d1;
     /* Lighter shade of blue for hover state */
   }
 
@@ -37,7 +88,7 @@
   }
 
   input {
-    @apply outline-none focus:outline-none bg-darkpurple-900 text-white placeholder:text-lightpurple-200 ring-transparent border border-lightpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none py-2 px-2.5 ring shadow-sm rounded-lg duration-100 hover:border-lightpurple-100 focus:border-lightpurple-100
+    @apply outline-none focus:outline-none bg-darkpurple-900 text-white placeholder:text-lightpurple-200 ring-transparent border border-lightpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none py-2 px-2.5 ring shadow-sm rounded-lg duration-100 hover:border-lightpurple-100 focus:border-lightpurple-100;
   }
 
   .card {
@@ -45,9 +96,10 @@
   }
 
   .card-neutral {
-    @apply bg-darkpurple-900 bg-opacity-50 p-4 border border-darkpurple-800 shadow-sm rounded-sm;  }
+    @apply bg-darkpurple-900/50 p-4 border border-darkpurple-800 shadow-sm rounded-sm;
+  }
 
   .message-content p {
-    @apply mb-4
+    @apply mb-4;
   }
 }
