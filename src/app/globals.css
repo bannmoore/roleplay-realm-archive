@@ -102,4 +102,56 @@
   .message-content p {
     @apply mb-4;
   }
+
+  /*
+  * React Select style overrides
+  * Ref: https://react-select.com/styles#the-classnameprefix-prop
+  */
+
+  .react-select-container {
+    @apply cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__control {
+    @apply bg-darkpurple-900 text-white placeholder:text-darkpurple-200 ring-transparent border border-darkpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none px-2.5 py-2 ring shadow-sm rounded-lg duration-100 hover:border-darkpurple-100 cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__control--is-focused {
+    @apply border-darkpurple-100;
+  }
+
+  .react-select__value-container {
+    @apply cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__menu {
+    @apply bg-darkpurple-900 text-white placeholder:text-darkpurple-200 ring-transparent border border-darkpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none ring shadow-sm rounded-lg duration-100 hover:border-darkpurple-100 focus:border-darkpurple-100 mt-2 cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__menu-list {
+    @apply cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__option {
+    @apply hover:bg-darkpurple-800 p-2 rounded-lg cursor-pointer pointer-events-auto;
+  }
+
+  .react-select__option--is-focused {
+    @apply bg-darkpurple-700;
+  }
+
+  .react-select__multi-value {
+    @apply bg-darkpurple-600 p-1 mr-2 rounded-md;
+  }
+
+  .react-select__multi-value__remove {
+    @apply bg-darkpurple-400 ml-2 px-1 rounded-md hover:bg-darkpurple-300;
+  }
+
+  .react-select__indicator {
+  }
+
+  .react-select__clear-indicator {
+    @apply ml-2 rounded-md hover:bg-darkpurple-300 cursor-pointer;
+  }
 }

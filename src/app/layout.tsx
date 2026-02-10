@@ -45,6 +45,9 @@ export default async function RootLayout({
                 Admin
               </Link>
             )}
+            <Link href="/characters" className="mr-4">
+              Characters
+            </Link>
           </nav>
           <div className="flex-1">
             {user && (

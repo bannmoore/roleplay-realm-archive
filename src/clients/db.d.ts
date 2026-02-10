@@ -24,6 +24,17 @@ export interface Channels {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface Characters {
+  createdAt: Generated<Timestamp>;
+  id: Generated<Int8>;
+  imageUri: string | null;
+  name: string;
+  story: string | null;
+  universeId: Int8 | null;
+  updatedAt: Generated<Timestamp>;
+  userId: Int8 | null;
+}
+
 export interface Messages {
   authorId: Int8;
   channelId: Int8;
@@ -86,6 +97,7 @@ export interface Users {
 
 export interface DB {
   channels: Channels;
+  characters: Characters;
   messages: Messages;
   messagesAttachments: MessagesAttachments;
   servers: Servers;

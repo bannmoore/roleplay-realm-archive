@@ -7,6 +7,7 @@ import {
 } from "kysely";
 import {
   Channels,
+  Characters,
   DB,
   Messages,
   MessagesAttachments,
@@ -25,6 +26,7 @@ export type Server = Selectable<Servers>;
 export type Channel = Selectable<Channels>;
 export type Message = Selectable<Messages>;
 export type MessageAttachment = Selectable<MessagesAttachments>;
+export type Character = Selectable<Characters>;
 
 export type MessageWithDisplayData = Message & {
   authorUsername: string;
@@ -104,9 +106,9 @@ class DatabaseClient {
           .onConflict((oc) =>
             oc
               .column("discordId")
-              .doUpdateSet({ discordUsername: user.discordUsername })
+              .doUpdateSet({ discordUsername: user.discordUsername }),
           )
-          .returningAll()
+          .returningAll(),
       )
       .selectFrom("inserted")
       .selectAll()
@@ -114,7 +116,7 @@ class DatabaseClient {
         this._db
           .selectFrom("users")
           .selectAll()
-          .where("discordId", "=", user.discordId)
+          .where("discordId", "=", user.discordId),
       )
       .executeTakeFirstOrThrow();
   }
@@ -131,14 +133,14 @@ class DatabaseClient {
               discordId: user.discordId,
               discordUsername: user.discordUsername,
               isAdmin: false,
-            }))
+            })),
           )
           .onConflict((oc) =>
             oc.column("discordId").doUpdateSet({
               discordUsername: (eb) => eb.ref("excluded.discordUsername"),
-            })
+            }),
           )
-          .returningAll()
+          .returningAll(),
       )
       .selectFrom("inserted")
       .selectAll()
@@ -159,12 +161,12 @@ class DatabaseClient {
           .values({
             name,
           })
-          .returningAll()
+          .returningAll(),
       )
       .selectFrom("inserted")
       .selectAll()
       .union(
-        this._db.selectFrom("universes").selectAll().where("name", "=", name)
+        this._db.selectFrom("universes").selectAll().where("name", "=", name),
       )
       .executeTakeFirstOrThrow();
   }
@@ -184,7 +186,7 @@ class DatabaseClient {
       .innerJoin("serversUsers", "serversUsers.serverId", "servers.id")
       .where("serversUsers.userId", "=", userId)
       .where((eb) =>
-        eb("serversUsers.userId", "=", userId).and("servers.active", "=", true)
+        eb("serversUsers.userId", "=", userId).and("servers.active", "=", true),
       )
       .execute();
   }
@@ -210,9 +212,9 @@ class DatabaseClient {
               name: server.name,
               iconHash: server.iconHash,
               active: true,
-            })
+            }),
           )
-          .returningAll()
+          .returningAll(),
       )
       .selectFrom("inserted")
       .selectAll()
@@ -220,7 +222,7 @@ class DatabaseClient {
         this._db
           .selectFrom("servers")
           .selectAll()
-          .where("discordId", "=", server.discordId)
+          .where("discordId", "=", server.discordId),
       )
       .executeTakeFirstOrThrow();
   }
@@ -232,10 +234,10 @@ class DatabaseClient {
         users.map((user) => ({
           userId: user.id,
           serverId: serverId,
-        }))
+        })),
       )
       .onConflict((oc) =>
-        oc.constraint("serversUsers_userId_serverId_key").doNothing()
+        oc.constraint("serversUsers_userId_serverId_key").doNothing(),
       )
       .execute();
   }
@@ -269,16 +271,16 @@ class DatabaseClient {
             .select("id")
             .where(({ eb, ref }) =>
               eb("messages.channelId", "=", ref("channels.id")).and(
-                eb("messages.authorId", "=", userId)
-              )
-            )
-        )
+                eb("messages.authorId", "=", userId),
+              ),
+            ),
+        ),
       )
       .execute();
   }
 
   async upsertChannel(
-    channel: Unsaved<Omit<Channel, "lastSyncedAt">>
+    channel: Unsaved<Omit<Channel, "lastSyncedAt">>,
   ): Promise<Channel | undefined> {
     return this._db
       .with("inserted", (db) =>
@@ -286,7 +288,7 @@ class DatabaseClient {
           .insertInto("channels")
           .values(channel)
           .onConflict((oc) => oc.column("discordId").doNothing())
-          .returningAll()
+          .returningAll(),
       )
       .selectFrom("inserted")
       .selectAll()
@@ -294,14 +296,14 @@ class DatabaseClient {
         this._db
           .selectFrom("channels")
           .selectAll()
-          .where("discordId", "=", channel.discordId)
+          .where("discordId", "=", channel.discordId),
       )
       .executeTakeFirstOrThrow();
   }
 
   async updateChannel(
     channelId: string,
-    update: Partial<Unsaved<Channel>>
+    update: Partial<Unsaved<Channel>>,
   ): Promise<void> {
     await this._db
       .updateTable("channels")
@@ -326,7 +328,7 @@ class DatabaseClient {
     }: {
       limit: number;
       offset: number;
-    }
+    },
   ): Promise<MessageWithDisplayData[]> {
     return this._db
       .with("reversed", (db) =>
@@ -339,11 +341,11 @@ class DatabaseClient {
             this._messageAttachments(ref("messages.id")).as("attachments"),
           ])
           .where((eb) =>
-            eb("channelId", "=", channelId).and("threadId", "is", null)
+            eb("channelId", "=", channelId).and("threadId", "is", null),
           )
           .orderBy("discordPublishedAt desc")
           .limit(limit)
-          .offset(offset)
+          .offset(offset),
       )
       .selectFrom("reversed")
       .selectAll()
@@ -361,8 +363,8 @@ class DatabaseClient {
         eb("messages.channelId", "=", channelId).and(
           "messages.threadId",
           "is",
-          null
-        )
+          null,
+        ),
       )
       .orderBy("discordPublishedAt asc")
       .limit(1)
@@ -379,8 +381,8 @@ class DatabaseClient {
         eb("messages.channelId", "=", channelId).and(
           "messages.threadId",
           "is",
-          null
-        )
+          null,
+        ),
       )
       .orderBy("discordPublishedAt desc")
       .limit(1)
@@ -396,7 +398,7 @@ class DatabaseClient {
   }
 
   async getThreadMessages(
-    parentMessageId: string
+    parentMessageId: string,
   ): Promise<MessageWithDisplayData[]> {
     return this._db
       .selectFrom("messages")
@@ -436,7 +438,7 @@ class DatabaseClient {
       .selectFrom("messages")
       .selectAll("messages")
       .where(({ eb, and }) =>
-        and([eb("channelId", "=", channelId), eb("lastSyncedAt", "is", null)])
+        and([eb("channelId", "=", channelId), eb("lastSyncedAt", "is", null)]),
       )
       .execute();
   }
@@ -456,10 +458,10 @@ class DatabaseClient {
               eb("messages.id", "=", ref("messagesAttachments.messageId")).and(
                 "messagesAttachments.storagePath",
                 "is",
-                null
-              )
-            )
-        )
+                null,
+              ),
+            ),
+        ),
       )
       .where("channelId", "=", channelId)
       .execute();
@@ -477,14 +479,14 @@ class DatabaseClient {
       .onConflict((oc) =>
         oc
           .column("discordId")
-          .doUpdateSet({ content: (eb) => eb.ref("excluded.content") })
+          .doUpdateSet({ content: (eb) => eb.ref("excluded.content") }),
       )
       .execute();
   }
 
   async updateMessage(
     messageId: string,
-    update: Partial<Unsaved<Message>>
+    update: Partial<Unsaved<Message>>,
   ): Promise<void> {
     await this._db
       .updateTable("messages")
@@ -494,7 +496,7 @@ class DatabaseClient {
   }
 
   async getAttachment(
-    attachmentId: string
+    attachmentId: string,
   ): Promise<MessageAttachment | undefined> {
     return this._db
       .selectFrom("messagesAttachments")
@@ -515,7 +517,7 @@ class DatabaseClient {
 
   async updateAttachment(
     attachmentId: string,
-    update: Partial<Unsaved<MessageAttachment>>
+    update: Partial<Unsaved<MessageAttachment>>,
   ): Promise<void> {
     await this._db
       .updateTable("messagesAttachments")
@@ -525,7 +527,7 @@ class DatabaseClient {
   }
 
   async upsertMessagesAttachments(
-    messagesAttachments: Unsaved<MessageAttachment>[]
+    messagesAttachments: Unsaved<MessageAttachment>[],
   ): Promise<MessageAttachment[]> {
     if (!messagesAttachments.length) {
       return [];
@@ -538,7 +540,7 @@ class DatabaseClient {
       .onConflict((oc) =>
         oc.column("discordId").doUpdateSet({
           storagePath: (eb) => eb.ref("excluded.storagePath"),
-        })
+        }),
       )
       .execute();
   }
@@ -548,8 +550,35 @@ class DatabaseClient {
       this._db
         .selectFrom("messagesAttachments")
         .selectAll("messagesAttachments")
-        .where("messagesAttachments.messageId", "=", messageId)
+        .where("messagesAttachments.messageId", "=", messageId),
     );
+  }
+
+  async getCharacters(userId: string): Promise<Character[]> {
+    return this._db
+      .selectFrom("characters")
+      .selectAll("characters")
+      .where("userId", "=", userId)
+      .execute();
+  }
+
+  async insertCharacter(character: Unsaved<Character>): Promise<Character> {
+    return this._db
+      .insertInto("characters")
+      .values(character)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+  }
+
+  async updateCharacter(character: Unsaved<Character>): Promise<Character> {
+    return this._db
+      .updateTable("characters")
+      .set({
+        ...character,
+        updatedAt: new Date(),
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
   }
 }
 
@@ -557,7 +586,7 @@ const database = Object.freeze(
   new DatabaseClient({
     connectionString: config.databaseUrl,
     cert: config.databaseCert,
-  })
+  }),
 );
 
 export default database;
