@@ -11,22 +11,22 @@ describe("servers", () => {
   it("should display the servers", () => {
     cy.task("mockApiResponse", {
       path: "/users/@me/guilds",
-      data: [discordServer],
+      data: [discordServer.data],
     });
 
     cy.task("mockApiResponse", {
       path: "/guilds/1111111111111111111/members",
-      data: discordServerUsers,
+      data: discordServerUsers.data,
     });
 
     cy.visit("/");
 
-    cy.contains("Servers updated successfully.").should("not.exist");
+    cy.contains("Server list synced").should("not.exist");
     cy.contains("TEST SERVER").should("not.exist");
 
-    cy.contains("Refresh Server List").click();
+    cy.contains("Sync servers").click();
 
-    cy.contains("Servers updated successfully.").should("exist");
+    cy.contains("Server list synced").should("exist");
     cy.contains("TEST SERVER").should("exist");
   });
 });

@@ -11,6 +11,7 @@
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "cy:open": "cypress open",
+    "cy:run": "cypress run",
     "codegen": "kysely-codegen --out-file ./src/clients/db.d.ts"
   },
   "dependencies": {

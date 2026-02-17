@@ -5,6 +5,7 @@ declare module "next-auth" {
     id?: string;
     username: string;
     global_name: string;
+    isCredentialUser?: boolean;
   }
 
   /**
@@ -15,6 +16,7 @@ declare module "next-auth" {
       id?: string;
       username: string;
       global_name: string;
+      isCredentialUser?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -25,7 +27,7 @@ declare module "@auth/core/jwt" {
       id?: string;
       username: string;
       global_name: string;
+      isCredentialUser?: boolean;
     };
-    isTestUser?: boolean;
   }
 }

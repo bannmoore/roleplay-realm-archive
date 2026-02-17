@@ -6,7 +6,7 @@ class MockApiServer {
 
   constructor() {
     this.server = getLocal();
-    this.port = 9000; // < Make sure this matches the port in your custom API_URL env url
+    this.port = 9000; // < Make sure this matches the port in your custom DISCORD_API_URL env url
   }
 
   reset() {
@@ -20,7 +20,7 @@ class MockApiServer {
       .thenReply(200, "Mock API server is up")
       .then(() => {
         console.info(
-          `\n📡 Mock API server running on http://localhost:${this.port}\n`
+          `\n📡 Mock API server running on http://localhost:${this.port}\n`,
         );
       });
   }
@@ -32,7 +32,7 @@ class MockApiServer {
   }
 
   mockGetResponse({ path, data }: { path: string; data: object }) {
-    console.debug(`Mock API server: GET ${path}`);
+    console.debug(`Mock API server: GET ${path}`, data);
     this.server.forGet(path).thenJson(200, data);
   }
 }

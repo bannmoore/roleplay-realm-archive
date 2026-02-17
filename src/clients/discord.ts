@@ -39,7 +39,7 @@ class DiscordClient {
 
   async getGuildMembers(guildId: string): Promise<DiscordUser[]> {
     const response: DiscordGuildMember[] = await this.getWithBotAuth(
-      `/guilds/${guildId}/members?limit=100`
+      `/guilds/${guildId}/members?limit=100`,
     );
 
     return response
@@ -63,7 +63,7 @@ class DiscordClient {
 
   async getMessages(
     channelId: string,
-    { beforeId, afterId }: { beforeId?: string; afterId?: string } = {}
+    { beforeId, afterId }: { beforeId?: string; afterId?: string } = {},
   ): Promise<DiscordMessage[]> {
     let qs = `/channels/${channelId}/messages?limit=100`;
 
@@ -84,7 +84,7 @@ class DiscordClient {
 
   async getThreadMessages(
     parentMessageId: string,
-    { beforeId, afterId }: { beforeId?: string; afterId?: string } = {}
+    { beforeId, afterId }: { beforeId?: string; afterId?: string } = {},
   ): Promise<DiscordMessage[]> {
     let qs = `/channels/${parentMessageId}/messages?limit=100`;
 
@@ -111,8 +111,9 @@ class DiscordClient {
 
   private async getWithUserAuth(
     path: string,
-    { userToken }: { userToken: string }
+    { userToken }: { userToken: string },
   ) {
+    console.debug(`Discord user API: get ${this._apiUrl}${path}`);
     const response = await fetch(`${this._apiUrl}${path}`, {
       method: "get",
       headers: {
@@ -125,6 +126,7 @@ class DiscordClient {
   }
 
   private async getWithBotAuth(path: string) {
+    console.debug(`Discord bot API: get ${this._apiUrl}${path}`);
     const response = await fetch(`${this._apiUrl}${path}`, {
       method: "get",
       headers: {
@@ -147,7 +149,7 @@ const discord = Object.freeze(
   new DiscordClient({
     apiUrl: config.discordApiUrl,
     botToken: config.discordBotToken,
-  })
+  }),
 );
 
 export default discord;

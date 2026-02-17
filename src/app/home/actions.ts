@@ -24,12 +24,12 @@ export async function refreshServers() {
         members.map((member) => ({
           discordId: member.id,
           discordUsername: member.username,
-        }))
+        })),
       );
       await database.upsertServersUsers(server.id, users);
 
       return;
-    })
+    }),
   );
 
   revalidatePath("/");

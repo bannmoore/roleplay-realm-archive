@@ -14,12 +14,12 @@ const providers: Provider[] = [
   }),
 ];
 
-if (process.env.NODE_ENV === "development") {
+if (config.enableCredentialAuth) {
   providers.push(testCredentialsProvider);
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // trustHost is equired for Docker deployment
+  // trustHost is required for Docker deployment
   // Ref: https://authjs.dev/getting-started/deployment#docker
   trustHost: true,
   // Google flags the original path as a security risk, so we use a custom path
@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt: jwtCallback,
     async session({ session, token }) {
       // Short-circuit for e2e test user
-      if (process.env.NODE_ENV === "development" && token.isTestUser) {
+      if (config.enableCredentialAuth && token.user?.isCredentialUser) {
         session.user = {
           ...session.user,
           ...token.user,
@@ -52,19 +52,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async signIn({ user, account }) {
+      if (user.isCredentialUser && config.enableCredentialAuth) {
+        return true;
+      }
+
       if (!account?.access_token) {
         throw new Error("Unable to authenticate with Discord");
       }
-      const discordCoreServerId = config.discordCoreServerId;
 
       const guilds = await discord.getUserGuilds({
-        userToken: account.access_token,
+        userToken: account?.access_token ?? "123456AbCDEFG",
       });
 
-      if (!guilds.find((guild) => guild.id === discordCoreServerId)) {
+      if (!guilds.find((guild) => guild.id === config.discordCoreServerId)) {
         console.error("Attempted invalid sign-in:", user);
         throw new Error(
-          "Could not verify server membership. Please contact an admin."
+          "Could not verify server membership. Please contact an admin.",
         );
       }
 

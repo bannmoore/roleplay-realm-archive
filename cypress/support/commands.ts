@@ -4,8 +4,8 @@ Cypress.Commands.add("createTestUser", () => {
   cy.task(
     "queryDb",
     `INSERT INTO users (discord_id, discord_username)
-     VALUES ('111111111111111111', 'test_user')
-     ON CONFLICT (discord_id) DO NOTHING`
+     VALUES ('${Cypress.env("CYPRESS_DISCORD_ID")}', '${Cypress.env("CYPRESS_DISCORD_USERNAME")}')
+     ON CONFLICT (discord_id) DO NOTHING`,
   );
 });
 
@@ -26,7 +26,7 @@ Cypress.Commands.add("login", () => {
 Cypress.Commands.add("resetDatabase", () => {
   cy.task(
     "queryDb",
-    "DELETE FROM servers WHERE discord_id = '1111111111111111111'"
+    `DELETE FROM servers WHERE discord_id = '${Cypress.env("CYPRESS_DISCORD_ID")}'`,
   );
 });
 

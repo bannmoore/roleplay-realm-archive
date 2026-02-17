@@ -1,5 +1,9 @@
 export const config = {
   baseUrl: process.env.BASE_URL || "",
+  cypressDiscordId: process.env.CYPRESS_DISCORD_ID || "",
+  cypressDiscordUsername: process.env.CYPRESS_DISCORD_USERNAME || "",
+  cypressUsername: process.env.CYPRESS_USERNAME || "",
+  cypressPassword: process.env.CYPRESS_PASSWORD || "",
   databaseUrl: process.env.DATABASE_URL || "",
   databaseCert: process.env.DATABASE_CERT || "",
   discordApiUrl: process.env.DISCORD_API_URL || "",
@@ -8,6 +12,7 @@ export const config = {
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET || "",
   discordState: process.env.DISCORD_STATE || "",
   discordCoreServerId: process.env.DISCORD_CORE_SERVER_ID || "",
+  enableCredentialAuth: process.env.ENABLE_CREDENTIAL_AUTH === "true",
   env: process.env.NODE_ENV || "development",
   doSpacesBucketName: process.env.DO_SPACES_BUCKET_NAME || "",
   doSpacesEndpoint: process.env.DO_SPACES_ENDPOINT || "",
