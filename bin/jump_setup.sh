@@ -18,10 +18,10 @@ fi
 if [[ $(which pgcli) ]]; then
   echo "Skipping pgcli installation."
 else
-  sudo apt install pipx
-  pipx ensurepath
-  pipx install pgcli
+  sudo pip install --break-system-packages pgcli
 fi
+
+# install postgresql
 
 if [[ $(which psql) ]]; then
   echo "Skipping postgres installation."
