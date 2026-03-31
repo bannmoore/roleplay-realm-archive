@@ -14,6 +14,8 @@ This project expects the following repos to be cloned into the same workspace:
 ## Quick Start
 
 ```sh
+brew bundle
+
 # roleplay-realm-archive-infra
 ./bin/local/db_up.sh
 ./bin/local/app_up.sh
@@ -27,6 +29,7 @@ This project expects the following repos to be cloned into the same workspace:
 ### Prerequisites
 
 This Terraform configuration expects the following resources to already exist:
+
 - A personal access token (generate [here](https://cloud.digitalocean.com/account/api/tokens?i=50c38c))
 - A container app registry called "bam"
 
@@ -90,7 +93,7 @@ source ../.env
 If the published image is built on the arm64 platform, it won't work on Digital Ocean. Check it like so:
 
 ```sh
-docker image ls | grep bam 
+docker image ls | grep bam
 docker inspect <IMAGE_ID> --format '{{.Architecture}}'
 ```
 

@@ -6,7 +6,16 @@
 
 ## First-time Setup
 
-Run `npx auth`
+```sh
+npx auth
+npm install
+```
+
+## Run locally
+
+```sh
+npm run dev
+```
 
 ## Testing
 

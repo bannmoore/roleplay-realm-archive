@@ -12,6 +12,7 @@ services:
       - ./_local_data:/var/lib/postgresql/data
 
   app:
+    platform: linux/amd64
     build:
       context: ../../roleplay-realm-archive
       tags:
