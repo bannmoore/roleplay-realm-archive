@@ -1,0 +1,27 @@
+services:
+  postgres:
+    build:
+      context: ../../roleplay-realm-archive-db
+    image: postgres:17
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./_local_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: ../../roleplay-realm-archive
+      tags:
+        - "registry.digitalocean.com/bam/roleplay-realm-archive"
+    environment:
+      BASE_URL: http://localhost:3000
+      DATABASE_URL: postgres://postgres:password@postgres/postgres?sslmode=disable
+      DISCORD_API_URL: https://discord.com/api
+    env_file: .env.local
+    depends_on:
+      - postgres
+    ports:
+      - 3000:80
