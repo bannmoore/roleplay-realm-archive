@@ -1,7 +1,7 @@
 services:
   postgres:
     build:
-      context: ../../roleplay-realm-archive-db
+      context: ../../db
     image: postgres:17
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
   app:
     platform: linux/amd64
     build:
-      context: ../../roleplay-realm-archive
+      context: ../../app
       tags:
         - "registry.digitalocean.com/bam/roleplay-realm-archive"
     environment:

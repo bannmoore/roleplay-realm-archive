@@ -6,21 +6,16 @@
 - [Terraform](https://developer.hashicorp.com/terraform?product_intent=terraform) (`brew install terraform`)
 - [Doctl](https://github.com/digitalocean/doctl) (`brew install doctl`)
 
-This project expects the following repos to be cloned into the same workspace:
-
-- `roleplay-realm-archive`
-- `roleplay-realm-archive-db`
-
 ## Quick Start
 
 ```sh
 brew bundle
 
-# roleplay-realm-archive-infra
+# infra
 ./bin/local/db_up.sh
 ./bin/local/app_up.sh
 
-# roleplay-realm-archive-db
+# db
 ./bin/migrate
 ```
 
