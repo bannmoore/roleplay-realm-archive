@@ -3,8 +3,8 @@
 import { MessageWithDisplayData } from "@/clients/database";
 import { getThreadMessages } from "./actions";
 import { useState } from "react";
-import MessageContent from "./MessageContent";
 import Attachment from "./Attachment";
+import MarkdownContent from "@/app/components/MarkdownContent";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -49,14 +49,14 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
             <Attachment attachment={attachment} />
           </div>
         ))}
-        <MessageContent message={message} />
+        {message.content && <MarkdownContent content={message.content} />}
         {message.isThread && (
           <div className="mt-2 text-sm text-gray-400">
             {isLoading
               ? "Loading thread..."
               : isExpanded
-              ? "Hide thread"
-              : "Show thread"}
+                ? "Hide thread"
+                : "Show thread"}
           </div>
         )}
       </div>
@@ -80,7 +80,9 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
                   <Attachment attachment={attachment} />
                 </div>
               ))}
-              <MessageContent message={threadMessage} />
+              {threadMessage.content && (
+                <MarkdownContent content={threadMessage.content} />
+              )}
             </div>
           ))}
         </div>

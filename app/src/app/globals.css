@@ -87,8 +87,9 @@
     @apply text-lg font-bold;
   }
 
-  input {
-    @apply outline-none focus:outline-none bg-darkpurple-900 text-white placeholder:text-lightpurple-200 ring-transparent border border-lightpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none py-2 px-2.5 ring shadow-sm rounded-lg duration-100 hover:border-lightpurple-100 focus:border-lightpurple-100;
+  input,
+  textarea {
+    @apply w-full outline-none focus:outline-none bg-darkpurple-900 text-white placeholder:text-lightpurple-200 ring-transparent border border-lightpurple-400 transition-all ease-in disabled:opacity-50 disabled:pointer-events-none select-none py-2 px-2.5 ring shadow-sm rounded-lg duration-100 hover:border-lightpurple-100 focus:border-lightpurple-100;
   }
 
   .card {

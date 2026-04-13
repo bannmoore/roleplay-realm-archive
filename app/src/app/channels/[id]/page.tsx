@@ -6,12 +6,19 @@ import MessageCard from "./MessageCard";
 import ExpandableMessageCard from "./ExpandableMessageCard";
 import Alert, { AlertInfo } from "@/app/components/Alert";
 import LoadMore from "./LoadMore";
+import { checkAuthenticated } from "@/util";
 
 export default async function Page({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await checkAuthenticated();
+
+  if (!user?.isAdmin) {
+    return notFound();
+  }
+
   const id = (await params).id;
   const channel = await database.getChannel(id);
 
@@ -95,7 +102,7 @@ function MessagesList({ messages }: { messages: MessageWithDisplayData[] }) {
 
 async function loadMoreMessages(
   channelId: string,
-  { limit, offset }: { limit: number; offset: number }
+  { limit, offset }: { limit: number; offset: number },
 ) {
   "use server";
   const messages = await database.getRecentMessages(channelId, {

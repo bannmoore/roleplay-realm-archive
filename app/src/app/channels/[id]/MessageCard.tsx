@@ -1,6 +1,6 @@
 import { MessageWithDisplayData } from "@/clients/database";
-import MessageContent from "./MessageContent";
 import Attachment from "./Attachment";
+import MarkdownContent from "@/app/components/MarkdownContent";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -20,7 +20,7 @@ export default function MessageCard({ message }: MessageCardProps) {
           <Attachment attachment={attachment} />
         </div>
       ))}
-      <MessageContent message={message} />
+      {message.content && <MarkdownContent content={message.content} />}
     </div>
   );
 }

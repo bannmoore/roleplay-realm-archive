@@ -27,12 +27,13 @@ export default async function CharactersPage() {
 
       <div className="mt-4">
         {characters.map((character) => (
-          <div
+          <Link
             key={character.name}
+            href={`/characters/${character.id}`}
             className="mb-4 flex items-center bg-darkpurple-900 p-4 border border-darkpurple-500 shadow-sm rounded-lg hover:bg-darkpurple-800 transition-all ease-in"
           >
             {character.name}
-          </div>
+          </Link>
         ))}
       </div>
     </>

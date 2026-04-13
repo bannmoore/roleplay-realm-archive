@@ -554,6 +554,14 @@ class DatabaseClient {
     );
   }
 
+  async getCharacter(characterId: string): Promise<Character | undefined> {
+    return this._db
+      .selectFrom("characters")
+      .selectAll("characters")
+      .where("id", "=", characterId)
+      .executeTakeFirst();
+  }
+
   async getCharacters(userId: string): Promise<Character[]> {
     return this._db
       .selectFrom("characters")
@@ -570,7 +578,9 @@ class DatabaseClient {
       .executeTakeFirstOrThrow();
   }
 
-  async updateCharacter(character: Unsaved<Character>): Promise<Character> {
+  async updateCharacter(
+    character: Partial<Unsaved<Character>>,
+  ): Promise<Character> {
     return this._db
       .updateTable("characters")
       .set({
