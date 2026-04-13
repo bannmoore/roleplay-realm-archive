@@ -7,7 +7,7 @@ import { AddUniverseForm } from "./AddUniverseForm";
 export default async function AdminPage() {
   const user = await checkAuthenticated();
 
-  if (!user) {
+  if (!user?.isAdmin) {
     return notFound();
   }
 
