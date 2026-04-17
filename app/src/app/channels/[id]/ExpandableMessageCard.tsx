@@ -5,6 +5,7 @@ import { getThreadMessages } from "./actions";
 import { useState } from "react";
 import Attachment from "./Attachment";
 import MarkdownContent from "@/app/components/MarkdownContent";
+import Debug from "@/app/components/Debug";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -44,6 +45,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
             {message.discordPublishedAt.toLocaleTimeString()}
           </span>
         </div>
+        <Debug>Message ID: {message.id}</Debug>
         {message.attachments.map((attachment) => (
           <div className="p-4" key={attachment.id}>
             <Attachment attachment={attachment} />
@@ -68,6 +70,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
               key={threadMessage.id}
               className="mb-2 bg-darkpurple-800 p-3 border border-darkpurple-600 shadow-sm rounded-lg"
             >
+              <Debug>Message ID: {threadMessage.id}</Debug>
               <div className="flex mb-1 text-sm">
                 <span className="flex-1">{threadMessage.authorUsername}</span>
                 <span className="text-xs">
@@ -77,6 +80,7 @@ export default function ExpandableMessageCard({ message }: MessageCardProps) {
               </div>
               {threadMessage.attachments.map((attachment) => (
                 <div className="p-4" key={attachment.id}>
+                  <Debug>Attachment ID: {attachment.id}</Debug>
                   <Attachment attachment={attachment} />
                 </div>
               ))}

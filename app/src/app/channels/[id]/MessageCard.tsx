@@ -1,6 +1,7 @@
 import { MessageWithDisplayData } from "@/clients/database";
 import Attachment from "./Attachment";
 import MarkdownContent from "@/app/components/MarkdownContent";
+import Debug from "@/app/components/Debug";
 interface MessageCardProps {
   message: MessageWithDisplayData;
 }
@@ -8,6 +9,7 @@ interface MessageCardProps {
 export default function MessageCard({ message }: MessageCardProps) {
   return (
     <div className="mb-4 card">
+      <Debug>Message ID: {message.id}</Debug>
       <div className="flex mb-2">
         <span className="flex-1">{message.authorUsername}</span>
         <span suppressHydrationWarning>
