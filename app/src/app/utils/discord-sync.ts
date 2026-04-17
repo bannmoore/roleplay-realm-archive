@@ -41,7 +41,7 @@ export async function syncDiscordChannel(channel: Channel) {
 
     for (const discordMessage of newDiscordMessages) {
       const dbMessage = createdMessages.find(
-        (m) => m.discordId === discordMessage.id
+        (m) => m.discordId === discordMessage.id,
       );
 
       if (!dbMessage) {
@@ -90,7 +90,7 @@ export async function syncDiscordChannel(channel: Channel) {
 
     for (const discordMessage of newDiscordMessages) {
       const dbMessage = createdMessages.find(
-        (m) => m.discordId === discordMessage.id
+        (m) => m.discordId === discordMessage.id,
       );
 
       if (!dbMessage) {
@@ -133,7 +133,7 @@ async function syncDiscordMessageThread({
   authorUsers: User[];
 }) {
   const oldestThreadMessage = await database.getOldestThreadMessage(
-    threadOrigin.id
+    threadOrigin.id,
   );
   let oldestThreadMessageId = oldestThreadMessage?.discordId;
   let isSyncingThreadsOld = true;
@@ -143,7 +143,7 @@ async function syncDiscordMessageThread({
       threadOrigin.discordId,
       {
         beforeId: oldestThreadMessageId,
-      }
+      },
     );
 
     if (!newDiscordThreadMessages.length) {
@@ -163,12 +163,12 @@ async function syncDiscordMessageThread({
     }
 
     const createdThreadMessages = await database.upsertMessages(
-      newUnsavedThreadMessages
+      newUnsavedThreadMessages,
     );
 
     for (const discordMessage of newDiscordThreadMessages) {
       const dbMessage = createdThreadMessages.find(
-        (m) => m.discordId === discordMessage.id
+        (m) => m.discordId === discordMessage.id,
       );
 
       if (!dbMessage) {
@@ -188,7 +188,7 @@ async function syncDiscordMessageThread({
   }
 
   const newestThreadMessage = await database.getNewestThreadMessage(
-    threadOrigin.id
+    threadOrigin.id,
   );
   let newestThreadMessageId = newestThreadMessage?.discordId;
   let isSyncingThreadsNew = true;
@@ -198,7 +198,7 @@ async function syncDiscordMessageThread({
       threadOrigin.discordId,
       {
         afterId: newestThreadMessageId,
-      }
+      },
     );
 
     if (!newDiscordThreadMessages.length) {
@@ -218,12 +218,12 @@ async function syncDiscordMessageThread({
     }
 
     const createdThreadMessages = await database.upsertMessages(
-      newUnsavedThreadMessages
+      newUnsavedThreadMessages,
     );
 
     for (const discordMessage of newDiscordThreadMessages) {
       const dbMessage = createdThreadMessages.find(
-        (m) => m.discordId === discordMessage.id
+        (m) => m.discordId === discordMessage.id,
       );
 
       if (!dbMessage) {
@@ -274,13 +274,13 @@ export async function syncMessageAttachments({
 
 export async function syncImage(
   messageId: string,
-  discordAttachment: DiscordMessageAttachment
+  discordAttachment: DiscordMessageAttachment,
 ) {
   const imageBuffer = await discord.downloadAttachment(discordAttachment);
 
   return storage.uploadFile({
     buf: imageBuffer,
-    path: `message-attachments/${messageId}/${discordAttachment.filename}`,
+    path: `message-attachments/${messageId}/${discordAttachment.id}-${discordAttachment.filename}`,
   });
 }
 

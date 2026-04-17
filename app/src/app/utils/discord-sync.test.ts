@@ -726,13 +726,13 @@ describe("discord-sync", async () => {
       when(storage.uploadFile)
         .calledWith({
           buf: expect.any(ArrayBuffer),
-          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[0].filename}`,
+          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[0].id}-${discordMessage.attachments[0].filename}`,
         })
         .thenResolve("/uploaded-path-1/file.png");
       when(storage.uploadFile)
         .calledWith({
           buf: expect.any(ArrayBuffer),
-          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[1].filename}`,
+          path: `message-attachments/${createdMessage.id}/${discordMessage.attachments[1].id}-${discordMessage.attachments[1].filename}`,
         })
         .thenResolve("/uploaded-path-2/file.png");
 
