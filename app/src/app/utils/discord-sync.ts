@@ -252,7 +252,7 @@ export async function syncMessageAttachments({
 }) {
   const newAttachments = [];
   for (const attachment of discordMessage.attachments) {
-    const path = await syncImage(dbMessage.id, attachment);
+    const path = await syncImage(dbMessage, attachment);
 
     newAttachments.push({
       discordId: attachment.id,
@@ -273,14 +273,14 @@ export async function syncMessageAttachments({
 }
 
 export async function syncImage(
-  messageId: string,
+  message: Message,
   discordAttachment: DiscordMessageAttachment,
 ) {
   const imageBuffer = await discord.downloadAttachment(discordAttachment);
 
   return storage.uploadFile({
     buf: imageBuffer,
-    path: `message-attachments/${messageId}/${discordAttachment.id}-${discordAttachment.filename}`,
+    path: `message-attachments/channel-${message.channelId}/message-${message.id}/${discordAttachment.id}-${discordAttachment.filename}`,
   });
 }
 
