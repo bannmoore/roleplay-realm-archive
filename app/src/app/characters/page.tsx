@@ -23,7 +23,9 @@ export default async function CharactersPage() {
         <Alert />
       </div>
 
-      <Link href="/characters/new">New</Link>
+      <Link href="/characters/new" className="button">
+        New
+      </Link>
 
       <div className="mt-4">
         {characters.map((character) => (
