@@ -4,15 +4,16 @@ import database from "@/clients/database";
 import storage from "@/clients/storage";
 import { redirect } from "next/navigation";
 
-export async function updateCharacter({
-  id,
-  story,
-  imageFile,
-}: {
-  id: string;
-  story: string;
-  imageFile: File | undefined;
-}) {
+export async function updateCharacter(
+  id: string,
+  {
+    story,
+    imageFile,
+  }: {
+    story: string;
+    imageFile: File | undefined;
+  },
+) {
   let imageUri;
   if (imageFile) {
     const arrayBuffer = await imageFile.arrayBuffer();
@@ -22,7 +23,7 @@ export async function updateCharacter({
     });
   }
 
-  await database.updateCharacter({ story, imageUri });
+  await database.updateCharacter(id, { story, imageUri });
 
   redirect(`/characters/${id}`);
 }

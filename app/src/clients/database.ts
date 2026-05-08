@@ -579,6 +579,7 @@ class DatabaseClient {
   }
 
   async updateCharacter(
+    id: string,
     character: Partial<Unsaved<Character>>,
   ): Promise<Character> {
     return this._db
@@ -587,6 +588,7 @@ class DatabaseClient {
         ...character,
         updatedAt: new Date(),
       })
+      .where("id", "=", id)
       .returningAll()
       .executeTakeFirstOrThrow();
   }

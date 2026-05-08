@@ -19,7 +19,7 @@ export default function EditCharacterForm({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setIsLoading(true);
-    return updateCharacter({ id: character.id, story, imageFile });
+    return updateCharacter(character.id, { story, imageFile });
   }
 
   async function handleCancelClick() {

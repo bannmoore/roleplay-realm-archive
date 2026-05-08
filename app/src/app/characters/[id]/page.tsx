@@ -20,14 +20,15 @@ export default async function Page({
   const id = (await params).id;
   const character = await database.getCharacter(id);
 
+  if (!character) {
+    return notFound();
+  }
+
   let imageUri;
   if (character?.imageUri) {
     imageUri = await storage.getPresignedUrl(character?.imageUri);
   }
-
-  if (!character) {
-    return notFound();
-  }
+  console.log(character.imageUri, imageUri);
 
   return (
     <div>
