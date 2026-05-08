@@ -21,4 +21,5 @@ Create migration:
 
 ```sh
 ./bin/migrate create new_migration_name sql
+./bin/migrate fix
 ```

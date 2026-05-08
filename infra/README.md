@@ -61,11 +61,15 @@ cat ~/.ssh/id_rsa.pub
 
 # Clone database repo
 cd /mnt/rra_jump_server_volume
-git clone git@github.com:bannmoore/roleplay-realm-archive-db.git
-cd roleplay-realm-archive-db
+git clone --no-checkout https://github.com/bannmoore/roleplay-realm-archive
+cd roleplay-realm-archive
+git sparse-checkout init --cone
+git sparse-checkout set db
+git checkout
+cd db
 
 # Run migrations
-source ../.env
+source ../../.env
 ./bin/jump_setup.sh
 ./bin/migrate.sh
 ```
@@ -75,9 +79,9 @@ To run new migrations:
 ```sh
 ./bin/jump/connect.sh
 
-cd /mnt/rra_jump_server_volume/roleplay-realm-archive-db
+cd /mnt/rra_jump_server_volume/roleplay-realm-archive/db
 git pull
-source ../.env
+source ../../.env
 ./bin/migrate.sh
 ```
 
