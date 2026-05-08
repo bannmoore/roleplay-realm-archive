@@ -16,13 +16,16 @@ export async function syncDiscordChannel(channel: Channel) {
   const oldestMessage = await database.getOldestMessage(channel.id);
   let oldestMessageId = oldestMessage?.discordId;
   let isSyncingOld = true;
+  console.log(`Starting from oldest message ${oldestMessage?.discordId}...`);
 
   while (isSyncingOld) {
+    console.log(`Fetching messages before ${oldestMessageId}...`);
     const newDiscordMessages = await discord.getMessages(channel.discordId, {
       beforeId: oldestMessageId,
     });
 
     if (!newDiscordMessages.length) {
+      console.log("Done syncing old messages.");
       isSyncingOld = false;
       break;
     }
@@ -37,6 +40,7 @@ export async function syncDiscordChannel(channel: Channel) {
       continue;
     }
 
+    console.log("Persisting messages to database...");
     const createdMessages = await database.upsertMessages(newUnsavedMessages);
 
     for (const discordMessage of newDiscordMessages) {
@@ -57,6 +61,7 @@ export async function syncDiscordChannel(channel: Channel) {
     oldestMessageId =
       newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
 
+    console.log("Pausing before next loop...");
     await sleep(1000);
   }
 
@@ -65,13 +70,16 @@ export async function syncDiscordChannel(channel: Channel) {
   const newestMessage = await database.getNewestMessage(channel.id);
   let newestMessageId = newestMessage?.discordId;
   let isSyncingNew = true;
+  console.log(`Starting from newest message ${newestMessageId}...`);
 
   while (isSyncingNew) {
+    console.log(`Fetching messages after ${newestMessageId}`);
     const newDiscordMessages = await discord.getMessages(channel.discordId, {
       afterId: newestMessageId,
     });
 
     if (!newDiscordMessages.length) {
+      console.log("Done syncing new messages.");
       isSyncingNew = false;
       break;
     }
@@ -86,6 +94,7 @@ export async function syncDiscordChannel(channel: Channel) {
       continue;
     }
 
+    console.log("Persisting messages to database...");
     const createdMessages = await database.upsertMessages(newUnsavedMessages);
 
     for (const discordMessage of newDiscordMessages) {
@@ -106,11 +115,13 @@ export async function syncDiscordChannel(channel: Channel) {
     newestMessageId =
       newUnsavedMessages[newUnsavedMessages.length - 1].discordId;
 
+    console.log("Pausing before next loop...");
     await sleep(1000);
   }
 
   /* THREADS */
 
+  console.log("Checking for thread origins...");
   const threadOrigins = await database.getThreadOriginMessages(channel.id);
 
   threadOrigins.forEach(async (threadOrigin) => {
@@ -137,8 +148,12 @@ async function syncDiscordMessageThread({
   );
   let oldestThreadMessageId = oldestThreadMessage?.discordId;
   let isSyncingThreadsOld = true;
+  console.log(
+    `Syncing thread ${threadOrigin.id} from oldest message ${oldestThreadMessageId}`,
+  );
 
   while (isSyncingThreadsOld) {
+    console.log(`Fetching messages after ${oldestThreadMessageId}`);
     const newDiscordThreadMessages = await discord.getThreadMessages(
       threadOrigin.discordId,
       {
@@ -147,6 +162,7 @@ async function syncDiscordMessageThread({
     );
 
     if (!newDiscordThreadMessages.length) {
+      console.log("Done syncing thread old messages.");
       isSyncingThreadsOld = false;
       break;
     }
@@ -162,6 +178,7 @@ async function syncDiscordMessageThread({
       continue;
     }
 
+    console.log("Persiting thread messages to database...");
     const createdThreadMessages = await database.upsertMessages(
       newUnsavedThreadMessages,
     );
@@ -181,6 +198,7 @@ async function syncDiscordMessageThread({
       });
     }
 
+    console.log("Pausing before next loop...");
     await sleep(1000);
 
     oldestThreadMessageId =
@@ -194,6 +212,9 @@ async function syncDiscordMessageThread({
   let isSyncingThreadsNew = true;
 
   while (isSyncingThreadsNew) {
+    console.log(
+      `Syncing thread ${threadOrigin.id} from newest message ${newestThreadMessageId}`,
+    );
     const newDiscordThreadMessages = await discord.getThreadMessages(
       threadOrigin.discordId,
       {
@@ -202,6 +223,7 @@ async function syncDiscordMessageThread({
     );
 
     if (!newDiscordThreadMessages.length) {
+      console.log("Done syncing thread old messages.");
       isSyncingThreadsNew = false;
       break;
     }
@@ -217,6 +239,7 @@ async function syncDiscordMessageThread({
       continue;
     }
 
+    console.log("Persisting thread messages to database...");
     const createdThreadMessages = await database.upsertMessages(
       newUnsavedThreadMessages,
     );
@@ -236,6 +259,7 @@ async function syncDiscordMessageThread({
       });
     }
 
+    console.log("Pausing before next loop...");
     await sleep(1000);
 
     newestThreadMessageId =
@@ -290,7 +314,13 @@ async function sleep(ms: number) {
 
 // Trim whitespace and mentions (@username) from message content
 function trimMessageContent(content?: string) {
-  return content?.replaceAll(/<@[0-9]+>/g, "").trim();
+  const trimmed = content?.trim() ?? "";
+
+  if (trimmed.length < 10) {
+    return "";
+  }
+
+  return content?.replaceAll(/<@[!0-9]+>/g, "").trim();
 }
 
 function zipMessagesAndAuthors({
