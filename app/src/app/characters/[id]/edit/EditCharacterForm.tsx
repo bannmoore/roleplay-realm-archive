@@ -3,19 +3,23 @@
 import { FormEvent, useState } from "react";
 import { backToCharacterPage, updateCharacter } from "./actions";
 import { Character } from "@/clients/database";
+import CharacterImageUriInput from "./CharacterImageImageUriInput";
 
 export default function EditCharacterForm({
   character,
+  imageUri,
 }: {
   character: Character;
+  imageUri: string | null;
 }) {
   const [story, setStory] = useState(character.story ?? "");
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File>();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setIsLoading(true);
-    return updateCharacter({ id: character.id, story });
+    return updateCharacter({ id: character.id, story, imageFile });
   }
 
   async function handleCancelClick() {
@@ -24,6 +28,13 @@ export default function EditCharacterForm({
 
   return (
     <form onSubmit={handleSubmit}>
+      <div className="mb-4 text-center">
+        <CharacterImageUriInput
+          defaultValue={imageUri}
+          onChange={setImageFile}
+        />
+      </div>
+
       <div className="mb-4">
         <label htmlFor="life_story">Life Story</label>
         <textarea

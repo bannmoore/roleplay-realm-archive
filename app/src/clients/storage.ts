@@ -54,8 +54,8 @@ class StorageClient {
           }
 
           resolve(pathWithEnv);
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -69,17 +69,6 @@ class StorageClient {
     });
     return newUrl;
   }
-
-  private _getMimeTypeExtension(mimeType: string) {
-    switch (mimeType) {
-      case "image/png":
-        return ".png";
-      case "image/jpeg":
-        return ".jpg";
-      default:
-        return "";
-    }
-  }
 }
 
 const storage = Object.freeze(
@@ -88,7 +77,7 @@ const storage = Object.freeze(
     endpoint: config.doSpacesEndpoint,
     accessId: config.doSpacesAccessId,
     secretKey: config.doSpacesSecretKey,
-  })
+  }),
 );
 
 export default storage;

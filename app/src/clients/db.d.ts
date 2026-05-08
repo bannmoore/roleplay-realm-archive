@@ -35,6 +35,12 @@ export interface Characters {
   userId: Int8 | null;
 }
 
+export interface CharactersImages {
+  characterId: Int8;
+  imageUri: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Messages {
   authorId: Int8;
   channelId: Int8;
@@ -98,6 +104,7 @@ export interface Users {
 export interface DB {
   channels: Channels;
   characters: Characters;
+  charactersImages: CharactersImages;
   messages: Messages;
   messagesAttachments: MessagesAttachments;
   servers: Servers;
